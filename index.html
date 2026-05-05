@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>GOODBUDDY · Demo v3</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{
+      font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;
+      background:#0f172a;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:14px;padding:24px;
+    }
+    .lab-label{font-size:11px;color:#334155;letter-spacing:2px;text-transform:uppercase;}
+
+    /* ── Phone ── */
+    .phone{
+      width:375px;height:780px;border-radius:48px;overflow:hidden;position:relative;
+      box-shadow:0 0 0 1px #1e293b,0 40px 100px rgba(0,0,0,0.7);
+      display:flex;flex-direction:column;background:#ededef;
+    }
+    .status-bar{height:48px;background:#fff;padding:14px 24px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;z-index:20;}
+    .status-bar .time{font-size:15px;font-weight:600;color:#111;}
+    .status-bar .icons{font-size:11px;color:#111;letter-spacing:2px;}
+    .chat-header{height:44px;background:#fff;border-bottom:0.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:20;}
+    .chat-header-title{font-size:17px;font-weight:600;color:#111;}
+
+    /* ── Scene Tabs ── */
+    .scene-tabs{display:flex;background:#f8f8f8;border-bottom:0.5px solid #e5e7eb;flex-shrink:0;z-index:20;}
+    .scene-tab{flex:1;padding:8px 0;font-size:11px;color:#9ca3af;background:none;border:none;border-bottom:2px solid transparent;font-family:inherit;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;}
+    .scene-tab.active{color:#07C160;border-bottom-color:#07C160;font-weight:600;}
+
+    /* ── Chat area ── */
+    .chat-area{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:8px;}
+    .msg-row{display:flex;align-items:flex-start;gap:8px;}
+    .user-row{display:flex;justify-content:flex-end;padding-right:8px;}
+    .user-bubble{background:#07C160;color:#fff;border-radius:16px 4px 16px 16px;padding:10px 14px;font-size:14px;max-width:200px;line-height:1.5;}
+    .agent-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#07C160,#05a04f);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;}
+    .agent-bubble{background:#fff;border-radius:4px 16px 16px 16px;padding:10px 14px;max-width:240px;font-size:14px;color:#111;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+
+    /* Buddy 专属气泡 · 对话流里的发言层 */
+    .buddy-bubble-wrap{display:flex;align-items:flex-start;gap:8px;}
+    .buddy-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:#0a0a14;border:1px solid #1e293b;display:flex;align-items:center;justify-content:center;font-family:"SF Mono",monospace;font-size:11px;color:#07C160;letter-spacing:1px;}
+    .buddy-bubble{background:#0f172a;border-radius:4px 16px 16px 16px;padding:11px 14px;max-width:240px;font-size:14px;color:#e2e8f0;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,0.12);}
+    .buddy-bubble .buddy-kaomoji{font-family:"SF Mono",monospace;letter-spacing:2px;color:#94a3b8;display:block;font-size:12px;margin-bottom:4px;}
+    .buddy-bubble .buddy-speech{color:#e2e8f0;}
+    .buddy-bubble .buddy-name-tag{font-size:10px;color:#1e293b;margin-top:5px;display:block;}
+
+    /* 密度标签 */
+    .density-label{font-size:10px;padding:3px 10px;border-radius:10px;display:inline-block;margin-left:44px;margin-top:2px;}
+    .dl-light{background:rgba(7,193,96,0.08);color:#07C160;border:1px solid rgba(7,193,96,0.2);}
+    .dl-mid  {background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);}
+    .dl-heavy{background:rgba(245,158,11,0.08);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);}
+
+    /* 时间分隔 */
+    .time-sep{text-align:center;font-size:11px;color:#9ca3af;letter-spacing:1px;margin:8px 0 4px;display:flex;align-items:center;gap:8px;}
+    .time-sep::before,.time-sep::after{content:'';flex:1;height:0.5px;background:#e5e7eb;}
+
+    /* ── 卡片 ── */
+    .card-wrap{padding-left:44px;padding-right:8px;width:100%;}
+    .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.1);cursor:pointer;user-select:none;transition:transform 0.1s;}
+    .card:active{transform:scale(0.985);}
+    .card-img{width:100%;height:110px;background:linear-gradient(135deg,#064e3b,#047857);position:relative;}
+    .card-img-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.18);letter-spacing:3px;}
+    .card-img-ov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.4));height:40px;}
+    .card-img-lb{position:absolute;bottom:8px;left:14px;font-size:11px;color:rgba(255,255,255,0.8);letter-spacing:1px;}
+    .card-body{padding:12px 14px 0;}
+    .card-tag{font-size:11px;font-weight:700;color:#07C160;letter-spacing:1px;margin-bottom:5px;}
+    .card-title{font-size:15px;font-weight:600;color:#111;margin-bottom:4px;}
+    .card-desc{font-size:12px;color:#6b7280;line-height:1.5;margin-bottom:10px;}
+    .card-merit{display:inline-flex;align-items:center;gap:5px;background:#f0faf4;border:1px solid #d1fae5;border-radius:20px;padding:3px 11px;font-size:12px;color:#065f46;font-weight:500;}
+
+    /* 签名层 · 最轻密度 */
+    .card-sig{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 11px;margin-top:10px;border-top:0.5px solid #f3f4f6;}
+    .sig-left{display:flex;align-items:center;gap:7px;}
+    .sig-dot{width:5px;height:5px;background:#07C160;border-radius:50%;flex-shrink:0;}
+    .sig-kaomoji{font-family:"SF Mono",monospace;font-size:11px;color:#9ca3af;letter-spacing:1px;}
+    .sig-text{font-size:12px;color:#9ca3af;}
+    .sig-arr{font-size:14px;color:#e5e7eb;}
+
+    /* 合成版 sig · 带 Buddy 反应行 */
+    .card-sig-with-line{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 12px;margin-top:10px;border-top:0.5px solid #f3f4f6;}
+    .card-sig-with-line .sig-left{display:flex;align-items:flex-start;gap:7px;}
+    .sig-reaction{font-size:11px;color:#6366f1;letter-spacing:0.5px;margin-top:2px;font-style:italic;}
+
+    /* /goodBuddy 命令气泡 */
+    .cmd-bubble{background:#0f172a;color:#94a3b8;border-radius:16px 4px 16px 16px;padding:9px 16px;font-family:"SF Mono","Fira Code",monospace;font-size:13px;letter-spacing:1px;}
+
+    .input-bar{height:52px;background:#fff;border-top:0.5px solid #e5e7eb;display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;}
+    .input-field{flex:1;height:34px;background:#f3f4f6;border-radius:18px;display:flex;align-items:center;padding:0 14px;font-size:14px;color:#9ca3af;}
+    .input-icon{font-size:20px;color:#9ca3af;}
+
+    /* ── Scenes wrapper ── */
+    .scene{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    .scene.active{display:flex;}
+
+    /* ── Scene 1 ── */
+    /* (uses generic chat-area) */
+
+    /* ── Scene 3: 传播 ── */
+    .share-scroll{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:16px;}
+
+    /* 朋友圈模拟 */
+    .moments-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+    .moments-header{background:#f6f6f6;padding:10px 14px;font-size:11px;color:#9ca3af;letter-spacing:1px;border-bottom:0.5px solid #e5e7eb;}
+    .moments-post{padding:14px;}
+    .moments-user{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .moments-avatar{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;}
+    .moments-name{font-size:14px;font-weight:600;color:#111;}
+    .moments-time{font-size:11px;color:#9ca3af;}
+    .moments-content{margin-bottom:12px;}
+    /* 超大颜文字 · 朋友圈主视觉 · 完整多行形状 */
+    .kaomoji-hero{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:38px;line-height:1.5;letter-spacing:5px;color:#111;display:block;text-align:center;white-space:pre;padding:16px 0 8px;}
+
+    /* 小程序入口卡 */
+    .mp-card{border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;background:#fafafa;margin-bottom:10px;}
+    .mp-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#07C160,#05a04f);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;}
+    .mp-info{}
+    .mp-title{font-size:13px;font-weight:600;color:#111;}
+    .mp-sub{font-size:11px;color:#9ca3af;}
+    .moments-footer{display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:0.5px solid #f3f4f6;}
+    .moments-actions{display:flex;gap:14px;}
+    .moments-action{font-size:12px;color:#9ca3af;display:flex;align-items:center;gap:4px;}
+
+    .section-label{font-size:10px;color:#9ca3af;letter-spacing:2px;text-transform:uppercase;padding:0 2px;}
+
+    /* 微信状态模拟 */
+    .status-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+    .status-card-header{background:#f6f6f6;padding:10px 14px;font-size:11px;color:#9ca3af;letter-spacing:1px;border-bottom:0.5px solid #e5e7eb;}
+    .profile-row{display:flex;align-items:center;gap:12px;padding:14px;}
+    .profile-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0;}
+    .profile-info{}
+    .profile-name{font-size:16px;font-weight:600;color:#111;margin-bottom:4px;}
+    .profile-status{font-size:13px;color:#6b7280;display:flex;align-items:center;gap:6px;line-height:1.5;}
+    .profile-status .st-kaomoji{font-family:"SF Mono",monospace;font-size:13px;color:#374151;letter-spacing:2px;}
+    .profile-status .st-badge{background:#f0faf4;border:1px solid #d1fae5;border-radius:4px;padding:1px 6px;font-size:10px;color:#07C160;font-weight:600;letter-spacing:0.5px;}
+    .status-entry{margin:0 14px 14px;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;background:#fafafa;}
+    .status-entry-left{display:flex;align-items:center;gap:8px;}
+    .status-entry-icon{font-size:18px;}
+    .status-entry-text{font-size:13px;color:#374151;}
+    .status-entry-sub{font-size:11px;color:#9ca3af;}
+    .status-entry-arr{font-size:16px;color:#d1d5db;}
+
+    /* 生成按钮 */
+    .gen-btn{margin:0 12px;background:#07C160;color:#fff;border:none;border-radius:22px;padding:12px;font-size:14px;font-family:inherit;cursor:pointer;text-align:center;font-weight:600;transition:background 0.2s;}
+    .gen-btn:hover{background:#05a04f;}
+
+    /* ── 半屏 ── */
+    .dim{position:absolute;inset:0;z-index:99;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.4s;}
+    .dim.active{background:rgba(0,0,0,0.5);pointer-events:all;}
+    .halfscreen{
+      position:absolute;left:0;right:0;bottom:0;height:90%;
+      background:#080812;border-radius:20px 20px 0 0;z-index:100;
+      display:flex;flex-direction:column;
+      transform:translateY(100%);transition:transform 0.42s cubic-bezier(0.32,0.72,0,1);
+      box-shadow:0 -12px 60px rgba(0,0,0,0.5);overflow:hidden;
+    }
+    .halfscreen.open{transform:translateY(0);}
+    .hs-handle{width:36px;height:4px;background:#1e293b;border-radius:2px;margin:12px auto 0;flex-shrink:0;}
+    .hs-close{position:absolute;top:14px;right:18px;width:28px;height:28px;border-radius:50%;background:#1e293b;border:none;cursor:pointer;font-family:inherit;font-size:13px;color:#6b7280;display:flex;align-items:center;justify-content:center;z-index:10;transition:background 0.2s;}
+    .hs-close:hover{background:#334155;}
+    .hs-body{flex:1;position:relative;overflow:hidden;}
+    .hs-view{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;opacity:0;pointer-events:none;transition:opacity 0.5s ease;}
+    .hs-view.active{opacity:1;pointer-events:all;}
+
+    /* 召唤 */
+    #hs-summon{background:#080812;}
+    .summon-label{font-size:11px;letter-spacing:3px;color:#374151;margin-bottom:28px;text-transform:uppercase;}
+    .hash-box{font-family:"SF Mono","Fira Code",monospace;font-size:14px;color:#07C160;background:rgba(7,193,96,0.05);border:1px solid rgba(7,193,96,0.12);border-radius:8px;padding:10px 20px;letter-spacing:2px;margin-bottom:32px;}
+    .scan-list{width:260px;display:flex;flex-direction:column;gap:20px;}
+    .scan-row{display:flex;align-items:center;gap:12px;}
+    .scan-lbl{font-size:11px;letter-spacing:1px;color:#4b5563;width:36px;}
+    .scan-track{flex:1;height:2px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;}
+    .scan-fill{height:100%;width:0%;background:linear-gradient(90deg,#07C160,#34d399);border-radius:2px;transition:width 0.9s cubic-bezier(0.4,0,0.2,1);}
+    .scan-val{font-size:12px;color:#07C160;width:48px;text-align:right;opacity:0;transition:opacity 0.4s;}
+
+    /* 揭晓 */
+    #hs-reveal{background:#080812;padding-top:24px;justify-content:flex-start;}
+    #hs-reveal.glow-N  .buddy-stage{text-shadow:0 0 20px rgba(107,114,128,0.4);}
+    #hs-reveal.glow-R  .buddy-stage{text-shadow:0 0 24px rgba(59,130,246,0.6),0 0 50px rgba(59,130,246,0.2);}
+    #hs-reveal.glow-SR .buddy-stage{text-shadow:0 0 28px rgba(147,51,234,0.7),0 0 60px rgba(147,51,234,0.25);}
+    #hs-reveal.glow-SSR .buddy-stage{text-shadow:0 0 24px rgba(245,158,11,0.9),0 0 60px rgba(245,158,11,0.4);}
+    @keyframes floatGentle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    @keyframes floatBouncy{0%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}60%{transform:translateY(-2px)}}
+    @keyframes floatSlow  {0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+    @keyframes floatStiff {0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+    @keyframes buddyBounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-10px) scale(1.05)}60%{transform:translateY(-3px) scale(0.97)}100%{transform:translateY(0) scale(1)}}
+    @keyframes nameIn{from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    .buddy-stage-wrap{cursor:pointer;user-select:none;margin-bottom:18px;}
+    .buddy-stage{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:17px;line-height:1.65;color:#e2e8f0;text-align:center;letter-spacing:3px;white-space:pre;display:inline-block;}
+    .buddy-stage.reacting{animation:buddyBounce 0.5s ease both !important;}
+    .tap-hint{font-size:10px;color:#1e293b;letter-spacing:1px;margin-top:-10px;margin-bottom:14px;transition:opacity 0.5s;}
+
+    .species-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+    .species-name{font-size:17px;font-weight:600;color:#94a3b8;}
+    .rarity-badge{font-size:10px;font-weight:800;letter-spacing:1.5px;padding:3px 9px;border-radius:4px;}
+    .rarity-N {background:rgba(107,114,128,0.15);color:#6b7280;border:1px solid rgba(107,114,128,0.3);}
+    .rarity-R {background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);}
+    .rarity-SR{background:rgba(147,51,234,0.12);color:#c084fc;border:1px solid rgba(147,51,234,0.3);}
+    .rarity-SSR{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.4);}
+    .status-line{font-size:11px;color:#374151;letter-spacing:1px;margin-bottom:16px;}
+    .buddy-name-wrap{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;}
+    .buddy-name{font-size:28px;font-weight:900;color:#f1f5f9;letter-spacing:8px;animation:nameIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+    .personality-tag{font-size:11px;border-radius:4px;padding:2px 8px;}
+    .pt-N {color:#6b7280;border:1px solid rgba(107,114,128,0.4);}
+    .pt-R {color:#60a5fa;border:1px solid rgba(59,130,246,0.4);}
+    .pt-SR{color:#c084fc;border:1px solid rgba(147,51,234,0.4);}
+    .pt-SSR{color:#fbbf24;border:1px solid rgba(245,158,11,0.4);}
+    .buddy-hash{font-family:monospace;font-size:10px;color:#1e293b;letter-spacing:1px;margin-bottom:18px;}
+    .dialogue-wrap{max-width:280px;margin-bottom:5px;align-self:flex-start;}
+    .dialogue-bubble-dark{background:#0f172a;border-radius:4px 16px 16px 16px;padding:12px 16px;border:1px solid #1e293b;}
+    .dialogue-bubble-dark p{font-size:15px;color:#e2e8f0;line-height:1.65;min-height:1.65em;}
+    .cursor{display:inline-block;width:2px;height:1em;background:#07C160;margin-left:1px;vertical-align:text-bottom;animation:blink 0.8s step-end infinite;}
+    .dialogue-from-dark{font-size:11px;color:#1e293b;padding-left:4px;margin-bottom:20px;}
+    .reveal-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+    .btn-confirm{background:#07C160;color:#fff;border:none;border-radius:22px;padding:10px 22px;font-size:14px;font-family:inherit;cursor:pointer;transition:background 0.2s;}
+    .btn-confirm:hover{background:#05a04f;}
+    .btn-save{background:transparent;color:#64748b;border:1px solid #1e293b;border-radius:22px;padding:10px 18px;font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.2s;}
+    .btn-retry{background:transparent;color:#374151;border:1px solid #1e293b;border-radius:22px;padding:10px 14px;font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.2s;}
+
+    /* 分享卡预览层 */
+    .share-overlay{position:absolute;inset:0;z-index:200;background:#04040a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:opacity 0.35s;}
+    .share-overlay.show{opacity:1;pointer-events:all;}
+    .share-card{width:260px;border-radius:16px;overflow:hidden;}
+    .sc-inner{padding:26px 22px 22px;display:flex;flex-direction:column;align-items:center;}
+    .sc-N  {background:linear-gradient(160deg,#111827,#1f2937);border:1px solid #374151;}
+    .sc-R  {background:linear-gradient(160deg,#0c1a2e,#1e3a5f);border:1px solid #1d4ed8;}
+    .sc-SR {background:linear-gradient(160deg,#180d2e,#3b1065);border:1px solid #7c3aed;}
+    .sc-SSR{background:linear-gradient(160deg,#1c1205,#3d2400);border:1px solid #d97706;}
+    .sc-ascii{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:15px;line-height:1.6;letter-spacing:3px;white-space:pre;text-align:center;margin-bottom:14px;}
+    .sc-N  .sc-ascii{color:#9ca3af;text-shadow:0 0 16px rgba(107,114,128,0.4);}
+    .sc-R  .sc-ascii{color:#93c5fd;text-shadow:0 0 16px rgba(59,130,246,0.5);}
+    .sc-SR .sc-ascii{color:#d8b4fe;text-shadow:0 0 16px rgba(147,51,234,0.6);}
+    .sc-SSR .sc-ascii{color:#fde68a;text-shadow:0 0 20px rgba(245,158,11,0.8),0 0 50px rgba(245,158,11,0.3);}
+    .sc-rar{font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:6px;}
+    .sc-N .sc-rar{color:#6b7280;}.sc-R .sc-rar{color:#60a5fa;}.sc-SR .sc-rar{color:#c084fc;}.sc-SSR .sc-rar{color:#fbbf24;}
+    .sc-name{font-size:22px;font-weight:900;letter-spacing:7px;margin-bottom:4px;}
+    .sc-N .sc-name{color:#f1f5f9;}.sc-R .sc-name{color:#eff6ff;}.sc-SR .sc-name{color:#faf5ff;}.sc-SSR .sc-name{color:#fffbeb;}
+    .sc-sp{font-size:11px;letter-spacing:1px;margin-bottom:14px;}
+    .sc-N .sc-sp{color:#4b5563;}.sc-R .sc-sp{color:#3b82f6;opacity:0.7;}.sc-SR .sc-sp{color:#9333ea;opacity:0.7;}.sc-SSR .sc-sp{color:#d97706;opacity:0.7;}
+    .sc-div{width:40px;height:1px;margin-bottom:12px;}
+    .sc-N .sc-div{background:#374151;}.sc-R .sc-div{background:#1d4ed8;opacity:0.5;}.sc-SR .sc-div{background:#7c3aed;opacity:0.5;}.sc-SSR .sc-div{background:#d97706;opacity:0.6;}
+    .sc-quote{font-size:12px;line-height:1.7;text-align:center;font-style:italic;margin-bottom:16px;}
+    .sc-N .sc-quote{color:#6b7280;}.sc-R .sc-quote{color:#93c5fd;}.sc-SR .sc-quote{color:#d8b4fe;}.sc-SSR .sc-quote{color:#fde68a;}
+    .sc-brand{font-size:10px;letter-spacing:2px;}
+    .sc-N .sc-brand{color:#1f2937;}.sc-R .sc-brand{color:#1e3a5f;}.sc-SR .sc-brand{color:#2d1b5e;}.sc-SSR .sc-brand{color:#3d2400;}
+    .share-tip{font-size:12px;color:#374151;letter-spacing:1px;}
+    .share-back{background:transparent;color:#4b5563;border:1px solid #1e293b;border-radius:20px;padding:8px 20px;font-size:13px;font-family:inherit;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <span class="lab-label">GOODBUDDY · Demo v3</span>
+
+  <div class="phone">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">▲▲▲ WiFi ▓▓▓</span>
+    </div>
+    <div class="chat-header"><span class="chat-header-title">公益Agent</span></div>
+
+    <!-- Scene Tabs -->
+    <div class="scene-tabs">
+      <button class="scene-tab active" onclick="switchScene(1)">首次触发</button>
+      <button class="scene-tab" onclick="switchScene(2)">陪伴规律</button>
+      <button class="scene-tab" onclick="switchScene(3)">分享传播</button>
+    </div>
+
+    <!-- ══════════════════════════════════
+         Scene 1 · 首次触发
+         条件：大 Agent 里第一次公益交互
+    ══════════════════════════════════ -->
+    <div class="scene active" id="scene-1">
+      <div class="chat-area">
+        <div class="user-row"><div class="user-bubble">我想捐一点钱做好事</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">好，这里有一个保护雪豹的项目，你看一下——</div>
+        </div>
+
+        <!-- 第一张公益卡片 · 此时底部无 Buddy 签名 -->
+        <div class="card-wrap">
+          <div class="card">
+            <div class="card-img">
+              <div class="card-img-wm">腾讯公益 · 野生动物保护</div>
+              <div class="card-img-ov"></div>
+              <div class="card-img-lb">雪豹保护计划</div>
+            </div>
+            <div class="card-body">
+              <div class="card-title">守护可可西里的雪豹</div>
+              <div class="card-desc">已帮助 2,847 只雪豹建立档案</div>
+              <div class="card-merit" style="margin-bottom:12px;">🌸 功德 +1</div>
+            </div>
+            <!-- 第一次公益交互后，Buddy 引子出现 -->
+            <div class="card-sig" onclick="openHalfscreen()" style="cursor:pointer;">
+              <div class="sig-left">
+                <div class="sig-dot"></div>
+                <span class="sig-text">有个家伙一直想认识你。</span>
+              </div>
+              <span class="sig-arr">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="density-label dl-light">↑ 第一次公益交互 · 引子出现 · tap → openDetailPage()</div>
+      </div>
+      <div class="input-bar">
+        <span class="input-icon">⊕</span>
+        <div class="input-field">发消息</div>
+        <span class="input-icon">🎤</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         Scene 2 · 陪伴规律
+         展示召唤后 Buddy 的三种出现密度
+    ══════════════════════════════════ -->
+    <div class="scene" id="scene-2">
+      <div class="chat-area">
+
+        <!-- ① 签名层：每张公益卡片底部 -->
+        <div class="time-sep">召唤后 · 日常</div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">好，野朋友计划有一张照片需要确认。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card">
+            <div class="card-img" style="height:80px;">
+              <div class="card-img-wm">红外相机 #3192</div>
+              <div class="card-img-ov"></div>
+              <div class="card-img-lb">野朋友计划</div>
+            </div>
+            <div class="card-body">
+              <div class="card-tag">✓ 已完成</div>
+              <div class="card-title" style="font-size:14px;">帮野朋友确认了一张照片</div>
+              <div class="card-merit" style="margin-bottom:10px;">🌸 功德 +1</div>
+            </div>
+            <!-- 合成在同一张卡片底部 · 带 Buddy 反应行 -->
+            <div class="card-sig-with-line">
+              <div class="sig-left">
+                <div class="sig-dot"></div>
+                <span class="sig-kaomoji">(=･ω･=)</span>
+                <div>
+                  <div class="sig-text">银荒 · 雪豹</div>
+                  <div class="sig-reaction">……哦，又来了。</div>
+                </div>
+              </div>
+              <span class="sig-arr">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="density-label dl-light">● Buddy 反应内嵌卡片底部 · 不另发气泡</div>
+
+        <!-- ② /goodBuddy 命令 · 同一个 Agent 返回 Buddy 专属内容 -->
+        <div class="time-sep">主动召唤</div>
+        <div class="user-row"><div class="cmd-bubble">/goodBuddy</div></div>
+        <div class="buddy-bubble-wrap">
+          <div class="agent-avatar">益</div>
+          <div class="buddy-bubble">
+            <span class="buddy-kaomoji">(=･ω･=)</span>
+            <span class="buddy-speech">你来了。比上次晚了三天。</span>
+            <span class="buddy-name-tag">银荒 · 雪豹</span>
+          </div>
+        </div>
+        <div class="density-label dl-mid">● 用户输入 /goodBuddy · 同一 Agent 返回 Buddy 专属卡</div>
+
+        <!-- ③ 里程碑 · 合成在完成卡片里 · 情绪加深 -->
+        <div class="time-sep">连续第 7 天</div>
+        <div class="card-wrap">
+          <div class="card">
+            <div class="card-body" style="padding-top:14px;padding-bottom:0;">
+              <div class="card-tag">✓ 已完成 · 连续 7 天</div>
+              <div class="card-title" style="font-size:14px;">帮一位乡村孩子改了一句鼓励的话</div>
+              <div class="card-merit" style="margin-bottom:10px;">🌸 功德 +7 连击</div>
+            </div>
+            <!-- 里程碑 · Buddy 反应内嵌 · 颜色加深 -->
+            <div class="card-sig-with-line">
+              <div class="sig-left">
+                <div class="sig-dot" style="background:#818cf8;"></div>
+                <span class="sig-kaomoji" style="color:#818cf8;">(=^ω^=)</span>
+                <div>
+                  <div class="sig-text">银荒 · 雪豹</div>
+                  <div class="sig-reaction">……七天了。我没想到。</div>
+                </div>
+              </div>
+              <span class="sig-arr">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="density-label dl-mid">● 里程碑节点 · 反应内嵌卡片 · 情绪加深</div>
+
+        <!-- 规则速查 -->
+        <div style="background:#f8f9fa;border-radius:10px;padding:14px 14px;margin:4px 0 8px;border:1px solid #e5e7eb;">
+          <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;">Buddy 出现规则</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="width:6px;height:6px;background:#07C160;border-radius:50%;flex-shrink:0;"></span>
+              <span style="font-size:12px;color:#374151;flex:1;">每张公益卡底部签名</span>
+              <span style="font-size:10px;color:#9ca3af;">始终</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="width:6px;height:6px;background:#818cf8;border-radius:50%;flex-shrink:0;"></span>
+              <span style="font-size:12px;color:#374151;flex:1;">/goodBuddy 主动召唤</span>
+              <span style="font-size:10px;color:#9ca3af;">随时</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="width:6px;height:6px;background:#818cf8;border-radius:50%;flex-shrink:0;"></span>
+              <span style="font-size:12px;color:#374151;flex:1;">完成好事 · 里程碑节点</span>
+              <span style="font-size:10px;color:#9ca3af;">内嵌卡片</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0;"></span>
+              <span style="font-size:12px;color:#374151;flex:1;">第一次召唤 · 重要节点</span>
+              <span style="font-size:10px;color:#9ca3af;">半屏登场</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="input-bar">
+        <span class="input-icon">⊕</span>
+        <div class="input-field">发消息</div>
+        <span class="input-icon">🎤</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         Scene 3 · 分享传播
+         朋友圈颜文字发文 + 微信状态入口
+    ══════════════════════════════════ -->
+    <div class="scene" id="scene-3">
+      <div class="share-scroll">
+
+        <div class="section-label">朋友圈 · 颜文字发文（非图片卡）</div>
+
+        <!-- 朋友圈预览 -->
+        <div class="moments-card">
+          <div class="moments-header">微信 · 朋友圈</div>
+          <div class="moments-post">
+            <div class="moments-user">
+              <div class="moments-avatar">我</div>
+              <div>
+                <div class="moments-name">mmmaia</div>
+                <div class="moments-time">刚刚</div>
+              </div>
+            </div>
+            <!-- 超大颜文字 · 就是主视觉 · 不需要其他文字 -->
+            <div class="moments-content">
+              <span class="kaomoji-hero" id="moments-kaomoji"> ∧  ∧
+(=^ω^=)
+ )   (
+(_∪_∪_)</span>
+              <div id="moments-name-line" style="text-align:center;font-size:11px;color:#9ca3af;letter-spacing:1px;padding-bottom:10px;">银荒 · 雪豹 · SR</div>
+            </div>
+            <!-- 小入口 · 引导好友进 Agent -->
+            <div class="mp-card">
+              <div class="mp-icon">益</div>
+              <div class="mp-info">
+                <div class="mp-title">认识你的公益伙伴</div>
+                <div class="mp-sub">腾讯公益 · GOODBUDDY</div>
+              </div>
+            </div>
+            <div class="moments-footer">
+              <span style="font-size:12px;color:#9ca3af;">广州</span>
+              <div class="moments-actions">
+                <span class="moments-action">♥ 3</span>
+                <span class="moments-action">💬 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">微信状态 · Buddy 签名 + 入口</div>
+
+        <!-- 微信状态预览 -->
+        <div class="status-card">
+          <div class="status-card-header">微信 · 个人名片</div>
+          <div class="profile-row">
+            <div class="profile-avatar">我</div>
+            <div class="profile-info">
+              <div class="profile-name">mmmaia</div>
+              <div class="profile-status">
+                <span class="st-kaomoji" id="status-kaomoji">(=･ω･=)</span>
+                <span id="status-text">银荒说：有些事你做了，就属于你。</span>
+              </div>
+            </div>
+          </div>
+          <!-- 状态里带的公益 Agent 入口 -->
+          <div class="status-entry">
+            <div class="status-entry-left">
+              <span class="status-entry-icon">🌸</span>
+              <div>
+                <div class="status-entry-text">正在做公益 · 第 <span id="status-days">7</span> 天</div>
+                <div class="status-entry-sub">腾讯公益 · 点击认识 TA 的伙伴</div>
+              </div>
+            </div>
+            <span class="status-entry-arr">›</span>
+          </div>
+        </div>
+
+        <!-- 生成按钮 · 用当前随机 Buddy 重新生成分享内容 -->
+        <button class="gen-btn" onclick="regenerateShare()">换一个 Buddy 看效果</button>
+        <div style="height:8px;"></div>
+
+      </div>
+    </div>
+
+    <!-- Dim + 半屏 -->
+    <div class="dim" id="dim" onclick="closeHalfscreen()"></div>
+    <div class="halfscreen" id="halfscreen">
+      <div class="hs-handle"></div>
+      <button class="hs-close" onclick="closeHalfscreen()">✕</button>
+      <div class="hs-body">
+        <div class="hs-view active" id="hs-summon">
+          <div class="summon-label">正在寻找你的伙伴</div>
+          <div class="hash-box" id="hash-box">· · · · · · · ·</div>
+          <div class="scan-list">
+            <div class="scan-row"><span class="scan-lbl">物种</span><div class="scan-track"><div class="scan-fill" id="f0"></div></div><span class="scan-val" id="v0"></span></div>
+            <div class="scan-row"><span class="scan-lbl">性格</span><div class="scan-track"><div class="scan-fill" id="f1"></div></div><span class="scan-val" id="v1"></span></div>
+            <div class="scan-row"><span class="scan-lbl">名字</span><div class="scan-track"><div class="scan-fill" id="f2"></div></div><span class="scan-val" id="v2"></span></div>
+          </div>
+        </div>
+        <div class="hs-view" id="hs-reveal">
+          <div class="buddy-stage-wrap" onclick="triggerReaction()">
+            <div class="buddy-stage" id="buddy-stage"></div>
+          </div>
+          <div class="tap-hint" id="tap-hint">· 点我 ·</div>
+          <div class="species-row">
+            <span class="species-name" id="r-species"></span>
+            <span class="rarity-badge" id="r-rarity"></span>
+          </div>
+          <div class="status-line" id="r-status"></div>
+          <div class="buddy-name-wrap">
+            <span class="buddy-name" id="r-name"></span>
+            <span class="personality-tag" id="r-personality"></span>
+          </div>
+          <div class="buddy-hash" id="r-hash"></div>
+          <div class="dialogue-wrap">
+            <div class="dialogue-bubble-dark">
+              <p id="r-line"><span class="cursor"></span></p>
+            </div>
+            <div class="dialogue-from-dark" id="r-from"></div>
+          </div>
+          <div class="reveal-actions">
+            <button class="btn-confirm" onclick="closeWithMessage()">好，认识你了</button>
+            <button class="btn-save" onclick="showShareCard()">保存这张卡</button>
+          </div>
+        </div>
+        <div class="share-overlay" id="share-overlay">
+          <div class="share-card" id="share-card"></div>
+          <div class="share-tip">长按图片保存到相册</div>
+          <button class="share-back" onclick="hideShareCard()">← 返回</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /phone -->
+
+  <script>
+  // ── DATA ──────────────────────────────────────
+  const ANIMALS = [
+    { id:'snow_leopard', name:'雪豹',  status:'极危物种', floatAnim:'floatGentle', floatDuration:'3.2s',
+      states:{ idle:[' ∧＿∧ ','(=･ω･=)',' )   ( ','(_∪_∪_)'], blink:[' ∧＿∧ ','(=ーωー=)',' )   ( ','(_∪_∪_)'], happy:[' ∧  ∧ ','(=^ω^=)',' )   ( ','(_∪_∪_)'], react:[' ∧  ∧ ','(=oωo=)','/>   <\\','(_∪_∪_)'], shy:[' ∧＿∧ ','(=///=)',' )   ( ','(_∪_∪_)'] } },
+    { id:'red_panda',    name:'小熊猫',status:'易危物种', floatAnim:'floatBouncy', floatDuration:'2.4s',
+      states:{ idle:['(ᐢ. .ᐢ)','( つ ⊂)','  U  U  '], blink:['(ᐢ- -ᐢ)','( つ ⊂)','  U  U  '], happy:['(ᐢ▾▾ᐢ)','(/  \\)','  U  U  '], react:['(ᐢoωoᐢ)','(/ !\\)','  U  U  '], shy:['(ᐢ////ᐢ)','( つ ⊂)','  U  U  '] } },
+    { id:'crane',        name:'黑颈鹤',status:'易危物种', floatAnim:'floatSlow',   floatDuration:'4s',
+      states:{ idle:['   ●   ','  /|   ',' ( |   ',' / ●  '], blink:['   ◉   ','  /|   ',' ( |   ',' / ●  '], happy:['  ●●   ','  /|   ',' ( |   ',' / ●  '], react:['  !●!  ','  \\|   ',' ( |   ',' / ●  '], shy:['   ●   ','  /|   ',' ( /   ',' / ●  '] } },
+    { id:'porpoise',     name:'江豚',  status:'极危物种', floatAnim:'floatGentle', floatDuration:'2.8s',
+      states:{ idle:[' ∿∿●∿∿ ','(･ ω ･)',' ≋≋≋≋≋ '], blink:[' ∿∿●∿∿ ','(ー ω ー)',' ≋≋≋≋≋ '], happy:[' ∿∿●∿∿ ','(^ω ^ )',' ≋≋≋≋≋ '], react:[' ∿∿●∿∿ ','(oω o!)',' ≋≋≋≋≋ '], shy:[' ∿∿●∿∿ ','(///ω )',' ≋≋≋≋≋ '] } },
+    { id:'fox',          name:'藏狐',  status:'无危物种', floatAnim:'floatStiff',  floatDuration:'4.5s',
+      states:{ idle:['/\\_ _/\\','(-___-)','  > □ <','(_/ \\_)'], blink:['/\\_ _/\\','(-----)','  > □ <','(_/ \\_)'], happy:['/\\_ _/\\','(-‿‿-)','  > ▽ <','(_/ \\_)'], react:['/\\_ _/\\','(-!_!-)','  > □ <','(_/ \\_)'], shy:['/\\_ _/\\','(///  )','  > □ <','(_/ \\_)'] } }
+  ];
+  const PERSONALITIES = [
+    { label:'温柔', lines:['嗯，你来了。','我在这里。一直都在。','等你好久了。'], tapLines:['轻点……','嗯？','……你叫我？'], idleLines:['今天风很轻。','……','嗯。'] },
+    { label:'毒舌', lines:['哦，你终于来了。','……稀奇，你真来了。','我还以为你不来了。'], tapLines:['干什么。','……','手痒吗？'], idleLines:['无聊。','……还在看？','哼。'] },
+    { label:'话痨', lines:['你好你好！我叫——等等你已经知道了。那今天风从哪边来你知道吗？','啊你来了！我有好多话想说……','终于！我刚才遇到了一件特别有意思的事——'], tapLines:['啊！','你点我！','欸欸欸！'], idleLines:['你在看我吗？','我刚想到一件事——','哦对了——'] },
+    { label:'神秘', lines:['有些事你不做，它也会发生。你做了，它就属于你。','你和我相遇，不是偶然算出来的。','今天风从西边来。你也是西边来的吗？'], tapLines:['……','你感觉到了吗。','嗯。'], idleLines:['……','风变了。','有什么来了。'] },
+    { label:'倔强', lines:['……你忘了什么吗？没事，我记着。','来了。好。','不用解释。来了就行。'], tapLines:['……知道了。','嗯。','……'], idleLines:['……','等你呢。','还在。'] }
+  ];
+  const NAMES = {
+    snow_leopard:['白日','冬至','银荒','霜降','暮云'],
+    red_panda:   ['火炭','橘落','红叶','煤球','炉边'],
+    crane:       ['苍空','晴川','鸣远','云渡','归迟'],
+    porpoise:    ['细浪','江心','清涛','浅灰','墨水'],
+    fox:         ['漠然','淡风','平原','石面','远坡']
+  };
+
+  function djb2(s){let h=5381;for(let i=0;i<s.length;i++)h=(Math.imul(h,33)^s.charCodeAt(i))>>>0;return h;}
+  function makeSeed(){return 'uid_'+Math.random().toString(36).slice(2,10);}
+  function generate(seed){
+    const h=djb2(seed);
+    const animal=ANIMALS[h%5];
+    const personality=PERSONALITIES[Math.floor(h/7)%5];
+    const rr=Math.floor(h/53)%100;
+    const rarity=rr>=97?'SSR':rr>=85?'SR':rr>=60?'R':'N';
+    const name=NAMES[animal.id][Math.floor(h/371)%5];
+    const line=personality.lines[Math.floor(h/2909)%3];
+    return{animal,personality,rarity,name,line,seed,h};
+  }
+
+  let buddy=null, blinkTimer=null, idleTimer=null, isReacting=false;
+
+  // ── Scene 切换 ─────────────────────────────
+  function switchScene(n){
+    document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.scene-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('scene-'+n).classList.add('active');
+    document.querySelectorAll('.scene-tab')[n-1].classList.add('active');
+  }
+
+  // ── 半屏 ──────────────────────────────────
+  function openHalfscreen(){
+    buddy=generate(makeSeed());
+    [0,1,2].forEach(i=>{const f=document.getElementById('f'+i);f.style.transition='none';f.style.width='0%';const v=document.getElementById('v'+i);v.style.opacity='0';v.textContent='';});
+    document.getElementById('hs-summon').classList.add('active');
+    document.getElementById('hs-reveal').classList.remove('active');
+    document.getElementById('share-overlay').classList.remove('show');
+    document.getElementById('halfscreen').classList.add('open');
+    document.getElementById('dim').classList.add('active');
+    setTimeout(()=>{[0,1,2].forEach(i=>document.getElementById('f'+i).style.transition='width 0.9s cubic-bezier(0.4,0,0.2,1)');runSummon();},80);
+  }
+  function closeHalfscreen(){stopAnimations();document.getElementById('halfscreen').classList.remove('open');document.getElementById('dim').classList.remove('active');}
+  function closeWithMessage(){closeHalfscreen();}
+
+  function runSummon(){
+    const el=document.getElementById('hash-box');
+    const full='#'+buddy.h.toString(16).padStart(8,'0');
+    let i=0;el.textContent='#'+'·'.repeat(8);
+    const t=setInterval(()=>{i++;el.textContent=full.slice(0,i)+'·'.repeat(Math.max(0,9-i));if(i>=9)clearInterval(t);},130);
+    const scan=(idx,val,delay)=>setTimeout(()=>{document.getElementById('f'+idx).style.width='100%';setTimeout(()=>{const v=document.getElementById('v'+idx);v.textContent=val;v.style.opacity='1';},700);},delay);
+    scan(0,buddy.animal.name,700);scan(1,buddy.personality.label,1400);scan(2,buddy.name,2100);
+    setTimeout(showReveal,3500);
+  }
+
+  function showReveal(){
+    const b=buddy;
+    const revealEl=document.getElementById('hs-reveal');
+    revealEl.className='hs-view glow-'+b.rarity;
+    renderState('idle');
+    const stage=document.getElementById('buddy-stage');
+    stage.style.animation=`${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
+    document.getElementById('r-species').textContent=b.animal.name;
+    const rb=document.getElementById('r-rarity');rb.textContent=b.rarity;rb.className='rarity-badge rarity-'+b.rarity;
+    document.getElementById('r-status').textContent=b.animal.status+' · 腾讯公益野朋友计划';
+    document.getElementById('r-name').textContent=b.name;
+    const pt=document.getElementById('r-personality');pt.textContent=b.personality.label;pt.className='personality-tag pt-'+b.rarity;
+    document.getElementById('r-hash').textContent=b.seed+' · #'+b.h.toString(16).slice(0,6);
+    document.getElementById('r-from').textContent=b.name+' · '+b.animal.name;
+    typewriter(b.line);
+    document.getElementById('hs-summon').classList.remove('active');
+    revealEl.classList.add('active');
+    startAnimLoop();
+  }
+
+  function renderState(state){
+    if(!buddy)return;
+    const lines=buddy.animal.states[state]||buddy.animal.states.idle;
+    document.getElementById('buddy-stage').textContent=lines.join('\n');
+  }
+  function startAnimLoop(){stopAnimations();scheduleBlink();scheduleIdle();}
+  function stopAnimations(){if(blinkTimer)clearTimeout(blinkTimer);if(idleTimer)clearTimeout(idleTimer);}
+  function scheduleBlink(){blinkTimer=setTimeout(()=>{if(!isReacting){renderState('blink');setTimeout(()=>{if(!isReacting)renderState('idle');scheduleBlink();},160);}else scheduleBlink();},2500+Math.random()*3500);}
+  function scheduleIdle(){idleTimer=setTimeout(()=>{if(!isReacting){const s=['happy','shy'][Math.floor(Math.random()*2)];renderState(s);const l=buddy.personality.idleLines;showIdleLine(l[Math.floor(Math.random()*l.length)]);setTimeout(()=>{if(!isReacting)renderState('idle');scheduleIdle();},2000);}else scheduleIdle();},5000+Math.random()*7000);}
+
+  function triggerReaction(){
+    if(!buddy||isReacting)return;
+    isReacting=true;
+    const stage=document.getElementById('buddy-stage');
+    renderState('react');
+    stage.classList.add('reacting');
+    stage.addEventListener('animationend',()=>stage.classList.remove('reacting'),{once:true});
+    const l=buddy.personality.tapLines;
+    showIdleLine(l[Math.floor(Math.random()*l.length)]);
+    document.getElementById('tap-hint').style.opacity='0';
+    setTimeout(()=>{renderState('idle');isReacting=false;},1000);
+  }
+
+  function showIdleLine(text){const el=document.getElementById('r-line');el.textContent='';typewriter(text);}
+  function typewriter(text){
+    const el=document.getElementById('r-line');
+    el.innerHTML='<span class="cursor"></span>';
+    let i=0;
+    const t=setInterval(()=>{el.textContent=text.slice(0,i);const c=document.createElement('span');c.className='cursor';el.appendChild(c);i++;if(i>text.length){el.textContent=text;clearInterval(t);}},60);
+  }
+  function retry(){stopAnimations();document.getElementById('hs-reveal').classList.remove('active');document.getElementById('share-overlay').classList.remove('show');document.getElementById('tap-hint').style.opacity='1';openHalfscreen();}
+
+  function showShareCard(){
+    const b=buddy;
+    const card=document.getElementById('share-card');
+    card.className='share-card sc-'+b.rarity;
+    card.innerHTML=`<div class="sc-inner"><div class="sc-ascii">${b.animal.states.happy.join('\n')}</div><div class="sc-rar">${b.rarity}</div><div class="sc-name">${b.name}</div><div class="sc-sp">${b.animal.name} · ${b.animal.status}</div><div class="sc-div"></div><div class="sc-quote">"${b.line}"</div><div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div></div>`;
+    document.getElementById('share-overlay').classList.add('show');
+  }
+  function hideShareCard(){document.getElementById('share-overlay').classList.remove('show');}
+
+  // ── 分享传播 · 随机刷新 ───────────────────
+  function regenerateShare(){
+    const b=generate(makeSeed());
+    const idleKaomoji=b.animal.states.idle[1]; // 第二行是脸 · 用于状态
+    const happyFull=b.animal.states.happy.join('\n'); // 完整多行形状 · 用于朋友圈大图
+    document.getElementById('moments-kaomoji').textContent=happyFull;
+    document.getElementById('moments-name-line').textContent=`${b.name} · ${b.animal.name} · ${b.rarity}`;
+    document.getElementById('status-kaomoji').textContent=idleKaomoji;
+    document.getElementById('status-text').textContent=`${b.name}说：${b.personality.idleLines[0]}`;
+  }
+  </script>
+</body>
+</html>
