@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>GOODBUDDY · Demo v3</title>
+  <title>GOODBUDDY · Demo v4</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     body{
@@ -76,8 +76,12 @@
     .sig-left{display:flex;align-items:center;gap:7px;}
     .sig-dot{width:5px;height:5px;background:#07C160;border-radius:50%;flex-shrink:0;}
     .sig-kaomoji{font-family:"SF Mono",monospace;font-size:11px;color:#9ca3af;letter-spacing:1px;}
+    .sig-kaomoji.heart{color:#f472b6;}
     .sig-text{font-size:12px;color:#9ca3af;}
     .sig-arr{font-size:14px;color:#e5e7eb;}
+    /* ✦ 随机闪烁 */
+    .sig-sparkle{font-size:10px;color:#f472b6;animation:sparkBlink 1.4s ease-in-out infinite;}
+    @keyframes sparkBlink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.2;transform:scale(0.7)}}
 
     /* 合成版 sig · 带 Buddy 反应行 */
     .card-sig-with-line{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 12px;margin-top:10px;border-top:0.5px solid #f3f4f6;}
@@ -164,6 +168,24 @@
     .hs-view{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;opacity:0;pointer-events:none;transition:opacity 0.5s ease;}
     .hs-view.active{opacity:1;pointer-events:all;}
 
+    /* 出生故事 */
+    #hs-birth{background:#080812;gap:0;}
+    .birth-egg{font-size:48px;margin-bottom:28px;animation:floatGentle 3.5s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(245,158,11,0.35));}
+    .birth-cause{font-size:11px;color:#92400e;letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:4px 14px;}
+    .birth-title{font-size:20px;font-weight:900;color:#f1f5f9;letter-spacing:3px;margin-bottom:8px;}
+    .birth-sub{font-size:12px;color:#334155;letter-spacing:1px;}
+    @keyframes fadeToSummon{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
+
+    /* 命名步骤 */
+    #hs-name{background:#080812;gap:0;}
+    .name-animal-display{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:14px;line-height:1.65;color:#e2e8f0;text-align:center;letter-spacing:3px;white-space:pre;margin-bottom:16px;}
+    .name-species-row{display:flex;align-items:center;gap:8px;margin-bottom:28px;}
+    .name-prompt{font-size:12px;color:#374151;letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;}
+    .name-input{width:220px;background:transparent;border:none;border-bottom:1.5px solid #1e3a5f;color:#f1f5f9;font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;padding:8px 0;font-family:inherit;outline:none;caret-color:#07C160;}
+    .name-input::placeholder{color:#1e293b;letter-spacing:3px;font-size:16px;}
+    .name-confirm{margin-top:28px;background:#07C160;color:#fff;border:none;border-radius:22px;padding:11px 36px;font-size:14px;font-family:inherit;cursor:pointer;opacity:0.3;pointer-events:none;transition:all 0.2s;}
+    .name-confirm.ready{opacity:1;pointer-events:all;}
+
     /* 召唤 */
     #hs-summon{background:#080812;}
     .summon-label{font-size:11px;letter-spacing:3px;color:#374151;margin-bottom:28px;text-transform:uppercase;}
@@ -221,6 +243,119 @@
     .btn-save{background:transparent;color:#64748b;border:1px solid #1e293b;border-radius:22px;padding:10px 18px;font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.2s;}
     .btn-retry{background:transparent;color:#374151;border:1px solid #1e293b;border-radius:22px;padding:10px 14px;font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.2s;}
 
+    /* ── Scene 4: 播报效果 ── */
+    .persona-pills{display:flex;gap:7px;padding:10px 12px;overflow-x:auto;flex-shrink:0;border-bottom:0.5px solid #e5e7eb;background:#fff;}
+    .persona-pills::-webkit-scrollbar{display:none;}
+    .persona-pill{flex-shrink:0;padding:5px 13px;border-radius:20px;font-size:11px;border:1px solid #e5e7eb;background:#fff;color:#9ca3af;cursor:pointer;font-family:inherit;transition:all 0.18s;white-space:nowrap;letter-spacing:0.5px;}
+    .persona-pill.active{background:#07C160;color:#fff;border-color:#07C160;font-weight:600;}
+    /* 播报卡 · 37c 形式：宠物日记本 + 精简数据附录 */
+    .bcast-card{border-left:3px solid rgba(7,193,96,0.4);overflow:hidden;}
+    /* 顶部日记区 */
+    .bcast-say{display:flex;gap:12px;padding:12px 14px;background:#faf8f3;border-bottom:0.5px solid #efebe0;align-items:flex-start;}
+    .bcast-face{
+      flex-shrink:0;
+      font-family:"SF Mono","Fira Code","Courier New",monospace;
+      font-size:10px;
+      line-height:1.25;
+      letter-spacing:0.5px;
+      color:#5a4d2f;
+      white-space:pre;
+      padding:2px 4px 0 0;
+      min-width:50px;
+      text-align:center;
+    }
+    .bcast-face.snow{color:#4a6a80;}
+    .bcast-face.red{color:#8a4a2c;}
+    .bcast-face.crane{color:#4a6b42;}
+    .bcast-face.porpoise{color:#3a4a6a;}
+    .bcast-face.fox{color:#7a5f36;}
+    .bcast-bubble{flex:1;min-width:0;padding-top:1px;}
+    .bcast-name{font-size:11px;color:#8a7a52;margin-bottom:5px;font-weight:500;display:flex;align-items:center;gap:5px;}
+    .bcast-name .species{color:#b5a477;font-weight:400;}
+    .bcast-name .dot{color:#d0c29a;margin:0 2px;}
+    .bcast-name .date{margin-left:auto;font-size:10px;color:#b5a477;font-weight:400;}
+    .bcast-line{font-size:13.5px;line-height:1.65;color:#1a1a1a;letter-spacing:0.005em;}
+    /* 精简数据附录条（日记下方灰条，把关键数字整合成一行） */
+    .bcast-note{display:flex;align-items:center;gap:0;padding:10px 14px;background:#fff;border-bottom:0.5px solid #f0f0ec;flex-wrap:wrap;}
+    .bcast-note .item{display:flex;align-items:baseline;gap:4px;font-size:11px;color:#888;padding:0 10px;border-right:0.5px solid #e8e8e8;line-height:1.4;}
+    .bcast-note .item:first-child{padding-left:0;}
+    .bcast-note .item:last-child{border-right:none;padding-right:0;}
+    .bcast-note .item b{font-size:13px;color:#222;font-weight:600;}
+    .bcast-note .item .u{font-size:10px;color:#aaa;}
+    .bcast-note .item .hl{color:#07C160;}
+    .bcast-note.streak{background:#fafdf8;}
+    /* 日记可视辅助区（周点、进度条、资金流等视觉辅助） */
+    .bcast-viz{padding:8px 14px 2px;background:#fff;}
+    /* 原版组件：周点 */
+    .bw-row{display:flex;justify-content:space-between;}
+    .bw-d{display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .bw-dot{width:7px;height:7px;border-radius:50%;background:#ddd;}
+    .bw-dot.done{background:#07C160;}
+    .bw-dot.today{background:#07C160;box-shadow:0 0 0 2px rgba(7,193,96,0.25);width:9px;height:9px;}
+    .bw-lbl{font-size:9px;color:#bbb;}
+    .bw-lbl.today-l{color:#07C160;font-weight:600;}
+    /* 进度条（内嵌） */
+    .bpb-t{height:5px;background:#f0f0f0;border-radius:3px;overflow:hidden;margin:4px 0;}
+    .bpb-f{height:100%;background:#07C160;border-radius:3px;}
+    /* 同行人（内嵌精简版） */
+    .btog-inline{display:flex;align-items:center;gap:6px;padding:2px 0;}
+    .btog-av{display:flex;}
+    .btog-a{width:16px;height:16px;border-radius:50%;border:1.5px solid #fff;margin-left:-4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:600;}
+    .btog-a:first-child{margin-left:0;}
+    .btog-a.a1{background:#ff9a5a;}
+    .btog-a.a2{background:#5dc4e6;}
+    .btog-a.me{background:#07C160;border-color:#fff;box-shadow:0 0 0 1.5px #07C160;}
+    .btog-t{font-size:11px;color:#888;}
+    .btog-t b{color:#07C160;font-weight:600;}
+    /* 项目行 */
+    .bpr{display:flex;align-items:center;justify-content:space-between;margin:0 14px 10px;padding:8px 11px;background:rgba(7,193,96,0.06);border-radius:8px;}
+    .bpr-l{display:flex;align-items:center;gap:7px;}
+    .bpr-i{font-size:13px;}
+    .bpr-n{font-size:11.5px;color:#07C160;font-weight:500;}
+    .bpr-a{font-size:11px;color:#a8d4ad;}
+    /* 选项格 */
+    .bopt{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px 4px;}
+    .bopt-i{padding:8px 10px;background:#fafaf7;border:0.5px solid #ececec;border-radius:8px;font-size:12px;color:#444;cursor:pointer;}
+    .bopt-i:hover{border-color:#07C160;}
+    .bopt-i .e{margin-right:5px;}
+    .bopt-i .s{font-size:10px;color:#999;display:block;margin-top:2px;margin-left:19px;}
+    /* 里程碑辅助条（紫） */
+    .bms-strip{background:linear-gradient(90deg,#ebe4f5,#f3edf8);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid #e8e0f2;}
+    .bms-b{display:inline-block;background:#8b5cf6;color:#fff;font-size:10px;font-weight:600;letter-spacing:0.04em;padding:3px 8px;border-radius:10px;}
+    .bms-n{font-size:18px;font-weight:700;color:#3d2b5a;letter-spacing:-0.01em;margin-left:4px;}
+    .bms-s{font-size:11px;color:#6b5a8a;margin-left:auto;}
+    /* 项目推荐 hero */
+    .bph{height:72px;background:linear-gradient(135deg,#ffb37a,#ff8f5a);display:flex;align-items:flex-end;padding:8px 12px;}
+    .bph-o{font-size:10px;color:#fff;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:4px;}
+    .btrust{display:flex;gap:5px;padding:0 14px 8px;flex-wrap:wrap;}
+    .btrust-c{font-size:10px;color:#6a8a70;background:#f0f6f1;padding:2px 7px;border-radius:4px;}
+    /* 完成标 */
+    .bdn-strip{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff5f5;border-bottom:0.5px solid #f5e8e0;}
+    .bdn-m{width:32px;height:32px;border-radius:50%;border:1px solid #e8413c;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;color:#e8413c;flex-shrink:0;}
+    .bdn-a{font-size:17px;font-weight:700;color:#e8413c;}
+    .bdn-w{font-size:11px;color:#888;margin-left:auto;}
+    /* 资金流（精简横向） */
+    .bff-h-row{display:flex;gap:4px;padding:10px 14px 0;align-items:center;}
+    .bff-h-row .step{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;}
+    .bff-h-row .step:not(:last-child)::after{content:'';position:absolute;top:5px;right:-50%;width:100%;height:1px;background:#e8e8e8;}
+    .bff-h-row .step .d{width:10px;height:10px;border-radius:50%;border:2px solid #ddd;background:#fff;z-index:1;}
+    .bff-h-row .step.active .d{border-color:#07C160;background:#07C160;}
+    .bff-h-row .step .l{font-size:9px;color:#999;text-align:center;line-height:1.3;}
+    .bff-h-row .step.active .l{color:#333;font-weight:500;}
+    /* 小红花大数字 */
+    .bfl-strip{background:linear-gradient(90deg,#fff1e0,#ffe4cc);padding:10px 14px;display:flex;align-items:baseline;gap:8px;border-bottom:0.5px solid #f5e0c0;}
+    .bfl-n{font-size:22px;font-weight:700;color:#d87020;letter-spacing:-0.02em;line-height:1;}
+    .bfl-n .u{font-size:12px;color:#b56030;font-weight:400;margin-left:3px;}
+    .bfl-e{font-size:18px;margin-left:auto;}
+    /* 野朋友照片 */
+    .bwl-photo{width:100%;height:70px;background:linear-gradient(135deg,#1e3a5f,#065f46);display:flex;align-items:center;justify-content:center;position:relative;}
+    .bwl-photo .bird{font-size:26px;}
+    .bwl-photo .tag{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.45);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;}
+    /* 按钮（紧凑版） */
+    .bbtn-p{display:block;width:calc(100% - 28px);margin:2px 14px 6px;height:36px;border:none;border-radius:10px;background:#07C160;color:#fff;font-size:13px;font-weight:500;cursor:pointer;}
+    .bbtn-o{display:block;width:calc(100% - 28px);margin:2px 14px 6px;height:34px;border:1px solid #d5e8d6;border-radius:10px;background:#fff;color:#07C160;font-size:12.5px;font-weight:500;cursor:pointer;}
+    .bbtn-g{display:block;width:calc(100% - 28px);margin:0 14px 10px;height:28px;border:none;background:transparent;color:#bbb;font-size:11.5px;cursor:pointer;}
+
     /* 分享卡预览层 */
     .share-overlay{position:absolute;inset:0;z-index:200;background:#04040a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:opacity 0.35s;}
     .share-overlay.show{opacity:1;pointer-events:all;}
@@ -252,7 +387,7 @@
   </style>
 </head>
 <body>
-  <span class="lab-label">GOODBUDDY · Demo v3</span>
+  <span class="lab-label">GOODBUDDY · Demo v4</span>
 
   <div class="phone">
     <div class="status-bar">
@@ -263,47 +398,99 @@
 
     <!-- Scene Tabs -->
     <div class="scene-tabs">
-      <button class="scene-tab active" onclick="switchScene(1)">首次触发</button>
-      <button class="scene-tab" onclick="switchScene(2)">陪伴规律</button>
+      <button class="scene-tab active" onclick="switchScene(1)">寄生激活</button>
+      <button class="scene-tab" onclick="switchScene(2)">助手播报</button>
       <button class="scene-tab" onclick="switchScene(3)">分享传播</button>
+      <button class="scene-tab" onclick="switchScene(4)">播报效果</button>
     </div>
 
     <!-- ══════════════════════════════════
-         Scene 1 · 首次触发
-         条件：大 Agent 里第一次公益交互
+         Scene 1 · 寄生激活
+         主业务完成 → 彩蛋行 → 孵化 → 诞生
     ══════════════════════════════════ -->
     <div class="scene active" id="scene-1">
       <div class="chat-area">
-        <div class="user-row"><div class="user-bubble">我想捐一点钱做好事</div></div>
+        <div class="user-row"><div class="user-bubble">帮我捐一下今天的步数</div></div>
         <div class="msg-row">
           <div class="agent-avatar">益</div>
-          <div class="agent-bubble">好，这里有一个保护雪豹的项目，你看一下——</div>
+          <div class="agent-bubble">好，今天 8,432 步已捐出。</div>
         </div>
 
-        <!-- 第一张公益卡片 · 此时底部无 Buddy 签名 -->
+        <!-- 主业务结果卡 · Skill A 正常返回 · 后端检查无 Buddy → sig 区追加彩蛋行 -->
         <div class="card-wrap">
           <div class="card">
-            <div class="card-img">
-              <div class="card-img-wm">腾讯公益 · 野生动物保护</div>
-              <div class="card-img-ov"></div>
-              <div class="card-img-lb">雪豹保护计划</div>
+            <div class="card-body" style="padding-top:14px;">
+              <div class="card-tag">✓ 捐步成功</div>
+              <div class="card-title">今日 8,432 步 → 守护一块湿地</div>
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+                <span style="font-size:12px;color:#6b7280;">= 0.84 公里候鸟迁徙栖地</span>
+              </div>
+              <div class="card-merit" style="margin-bottom:12px;">🌸 小红花 +1</div>
             </div>
-            <div class="card-body">
-              <div class="card-title">守护可可西里的雪豹</div>
-              <div class="card-desc">已帮助 2,847 只雪豹建立档案</div>
-              <div class="card-merit" style="margin-bottom:12px;">🌸 功德 +1</div>
+            <!-- 彩蛋行 · 后端无 Buddy 记录时注入 -->
+            <div class="card-sig" onclick="openHalfscreen('因为你的捐步')" style="cursor:pointer;background:#fafaf2;">
+              <div class="sig-left">
+                <div class="sig-dot" style="background:#f59e0b;"></div>
+                <span class="sig-text" style="color:#92400e;">你的善行可以孕育一个小伙伴 🥚 → 了解一下？</span>
+              </div>
+              <span class="sig-arr" style="color:#d97706;">›</span>
             </div>
-            <!-- 第一次公益交互后，Buddy 引子出现 -->
-            <div class="card-sig" onclick="openHalfscreen()" style="cursor:pointer;">
+          </div>
+        </div>
+        <div class="density-label dl-light">↑ Skill A 主业务卡 · 后端查无 Buddy → sig 追加彩蛋行 · tap → GOODBUDDY Skill</div>
+
+        <!-- 激活完成后 · Agent 跟进询问播报意愿 -->
+        <div class="time-sep">认识之后</div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">要让<span id="ask-buddy-name">银荒</span>以后帮你播报公益结果吗？<br><span style="font-size:11px;color:#9ca3af;">捐步、小红花、野朋友……都会用它的方式说给你听。</span></div>
+        </div>
+        <!-- 快捷回复 -->
+        <div style="display:flex;gap:8px;padding-left:44px;padding-right:8px;flex-wrap:wrap;">
+          <div onclick="enableBuddyMode()" style="background:#fff;border:1px solid #07C160;border-radius:16px;padding:7px 16px;font-size:13px;color:#07C160;cursor:pointer;">好啊，开启</div>
+          <div onclick="skipBuddyMode()" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:7px 16px;font-size:13px;color:#9ca3af;cursor:pointer;">以后再说</div>
+        </div>
+        <div class="density-label dl-light">激活完成后 · Agent 询问是否开启助手播报</div>
+
+        <!-- 已激活后的日常卡 · 随机爱心状态演示 -->
+        <div class="time-sep">激活后 · 下次做好事</div>
+        <div class="user-row"><div class="user-bubble">帮我捐一下今天的步数</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">好，今天 6,211 步已捐出。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card">
+            <div class="card-body" style="padding-top:14px;">
+              <div class="card-tag">✓ 捐步成功</div>
+              <div class="card-title">今日 6,211 步 → 守护湿地</div>
+              <div class="card-merit" style="margin-bottom:12px;">🌸 小红花 +1</div>
+            </div>
+            <!-- 普通签名层 -->
+            <div class="card-sig" id="sig-normal" onclick="openStatusScreen()" style="cursor:pointer;">
               <div class="sig-left">
                 <div class="sig-dot"></div>
-                <span class="sig-text">有个家伙一直想认识你。</span>
+                <span class="sig-kaomoji" id="sig-face">(=･ω･=)</span>
+                <span class="sig-sparkle" id="sig-spark" style="display:none;">✦</span>
+                <span class="sig-text" id="s1-sig-label">银荒 · 雪豹</span>
               </div>
               <span class="sig-arr">›</span>
             </div>
           </div>
         </div>
-        <div class="density-label dl-light">↑ 第一次公益交互 · 引子出现 · tap → openDetailPage()</div>
+        <div class="density-label dl-light">↑ 已激活 · 签名层随机出现爱心脸 + ✦ · tap 看状态</div>
+        <button onclick="randomizeSig()" style="margin-left:44px;margin-top:4px;background:none;border:1px solid #e5e7eb;border-radius:16px;padding:5px 14px;font-size:11px;color:#9ca3af;cursor:pointer;font-family:inherit;">刷新 · 看随机效果</button>
+
+        <!-- 规则说明 -->
+        <div style="background:#f8f9fa;border-radius:10px;padding:12px 14px;margin:4px 0;border:1px solid #e5e7eb;">
+          <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;">激活逻辑</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:12px;color:#374151;">① 主业务 Skill 正常完成，结果卡优先展示</div>
+            <div style="font-size:12px;color:#374151;">② 后端查 getBuddyStatus → 无记录 → sig 区注入彩蛋行</div>
+            <div style="font-size:12px;color:#374151;">③ 用户 tap → sendFollowUpMessage → GOODBUDDY Skill</div>
+            <div style="font-size:12px;color:#374151;">④ Buddy 与这次捐步绑定诞生，有出生故事</div>
+          </div>
+        </div>
       </div>
       <div class="input-bar">
         <span class="input-icon">⊕</span>
@@ -313,109 +500,90 @@
     </div>
 
     <!-- ══════════════════════════════════
-         Scene 2 · 陪伴规律
-         展示召唤后 Buddy 的三种出现密度
+         Scene 2 · 助手播报
+         buddyMode 路由对比 + /goodBuddy 播报格式
     ══════════════════════════════════ -->
     <div class="scene" id="scene-2">
       <div class="chat-area">
 
-        <!-- ① 签名层：每张公益卡片底部 -->
-        <div class="time-sep">召唤后 · 日常</div>
-        <div class="msg-row">
-          <div class="agent-avatar">益</div>
-          <div class="agent-bubble">好，野朋友计划有一张照片需要确认。</div>
+        <!-- 状态说明 · 助手播报已开启 -->
+        <div style="background:#f0faf4;border-radius:10px;padding:10px 14px;margin-bottom:4px;border:1px solid #d1fae5;display:flex;align-items:center;gap:8px;">
+          <div style="width:6px;height:6px;background:#07C160;border-radius:50%;flex-shrink:0;"></div>
+          <span style="font-size:12px;color:#065f46;">助手播报已开启 · <span id="s2-status-name">银荒</span>会用自己的方式说结果</span>
         </div>
-        <div class="card-wrap">
-          <div class="card">
-            <div class="card-img" style="height:80px;">
-              <div class="card-img-wm">红外相机 #3192</div>
-              <div class="card-img-ov"></div>
-              <div class="card-img-lb">野朋友计划</div>
-            </div>
-            <div class="card-body">
-              <div class="card-tag">✓ 已完成</div>
-              <div class="card-title" style="font-size:14px;">帮野朋友确认了一张照片</div>
-              <div class="card-merit" style="margin-bottom:10px;">🌸 功德 +1</div>
-            </div>
-            <!-- 合成在同一张卡片底部 · 带 Buddy 反应行 -->
-            <div class="card-sig-with-line">
-              <div class="sig-left">
-                <div class="sig-dot"></div>
-                <span class="sig-kaomoji">(=･ω･=)</span>
-                <div>
-                  <div class="sig-text">银荒 · 雪豹</div>
-                  <div class="sig-reaction">……哦，又来了。</div>
+
+        <!-- 用户查询入口 -->
+        <div class="time-sep">同一条查询 · 不同路由</div>
+        <div class="user-row"><div class="user-bubble">帮我查查我的小红花</div></div>
+
+        <!-- ── buddyMode OFF · Skill B 直接返回 ── -->
+        <div style="background:#f0f4ff;border-radius:10px;padding:8px 10px 6px;margin:2px 0 0;">
+          <div style="font-size:10px;color:#818cf8;letter-spacing:1px;margin-bottom:6px;">buddyMode: OFF → Skill B 直接返回</div>
+          <div class="msg-row" style="margin:0;">
+            <div class="agent-avatar">益</div>
+            <div style="flex:1;">
+              <div class="card" style="margin:0;max-width:220px;">
+                <div class="card-body" style="padding-top:12px;padding-bottom:12px;">
+                  <div class="card-tag" style="color:#6366f1;">📊 小红花余额</div>
+                  <div style="font-size:22px;font-weight:900;color:#111;margin:4px 0;">1,234 朵</div>
+                  <div style="font-size:11px;color:#9ca3af;">本月新增 47 朵 · 累计捐出 892 朵</div>
+                </div>
+                <div class="card-sig" onclick="openStatusScreen()" style="cursor:pointer;">
+                  <div class="sig-left">
+                    <div class="sig-dot"></div>
+                    <span class="sig-kaomoji" id="s2-off-kaomoji">(=･ω･=)</span>
+                    <span class="sig-text" id="s2-off-label">银荒 · 雪豹</span>
+                  </div>
+                  <span class="sig-arr">›</span>
                 </div>
               </div>
-              <span class="sig-arr">›</span>
             </div>
           </div>
         </div>
-        <div class="density-label dl-light">● Buddy 反应内嵌卡片底部 · 不另发气泡</div>
+        <div class="density-label dl-light">普通数据卡 · Buddy 仅签名层</div>
 
-        <!-- ② /goodBuddy 命令 · 同一个 Agent 返回 Buddy 专属内容 -->
-        <div class="time-sep">主动召唤</div>
-        <div class="user-row"><div class="cmd-bubble">/goodBuddy</div></div>
-        <div class="buddy-bubble-wrap">
-          <div class="agent-avatar">益</div>
-          <div class="buddy-bubble">
-            <span class="buddy-kaomoji">(=･ω･=)</span>
-            <span class="buddy-speech">你来了。比上次晚了三天。</span>
-            <span class="buddy-name-tag">银荒 · 雪豹</span>
-          </div>
-        </div>
-        <div class="density-label dl-mid">● 用户输入 /goodBuddy · 同一 Agent 返回 Buddy 专属卡</div>
-
-        <!-- ③ 里程碑 · 合成在完成卡片里 · 情绪加深 -->
-        <div class="time-sep">连续第 7 天</div>
-        <div class="card-wrap">
-          <div class="card">
-            <div class="card-body" style="padding-top:14px;padding-bottom:0;">
-              <div class="card-tag">✓ 已完成 · 连续 7 天</div>
-              <div class="card-title" style="font-size:14px;">帮一位乡村孩子改了一句鼓励的话</div>
-              <div class="card-merit" style="margin-bottom:10px;">🌸 功德 +7 连击</div>
-            </div>
-            <!-- 里程碑 · Buddy 反应内嵌 · 颜色加深 -->
-            <div class="card-sig-with-line">
-              <div class="sig-left">
-                <div class="sig-dot" style="background:#818cf8;"></div>
-                <span class="sig-kaomoji" style="color:#818cf8;">(=^ω^=)</span>
-                <div>
-                  <div class="sig-text">银荒 · 雪豹</div>
-                  <div class="sig-reaction">……七天了。我没想到。</div>
+        <!-- ── buddyMode ON · GOODBUDDY Skill 接管 ── -->
+        <div style="background:#0a0a18;border-radius:10px;padding:8px 10px 6px;margin:4px 0 0;">
+          <div style="font-size:10px;color:#07C160;letter-spacing:1px;margin-bottom:6px;">buddyMode: ON → GOODBUDDY Skill 接管</div>
+          <div class="msg-row" style="margin:0;">
+            <div class="agent-avatar">益</div>
+            <div style="flex:1;">
+              <!-- 同样数据 · Buddy 人格包装 -->
+              <div class="card" style="margin:0;max-width:220px;background:#0f172a;border:1px solid #1e293b;">
+                <div class="card-body" style="padding-top:12px;padding-bottom:0;">
+                  <div class="card-tag" style="color:#34d399;">📊 小红花</div>
+                  <div style="font-size:19px;font-weight:900;color:#f1f5f9;margin:4px 0;">1,234 朵了。</div>
+                  <div style="font-size:12px;color:#64748b;line-height:1.6;margin-bottom:8px;">这个月多了 47 朵，我有替你数着。</div>
+                </div>
+                <!-- Buddy 内嵌反应行 · 深色版 · tap 进半屏 -->
+                <div onclick="openStatusScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px 11px;margin-top:4px;border-top:0.5px solid #1e293b;cursor:pointer;">
+                  <div style="display:flex;align-items:center;gap:7px;">
+                    <div style="width:5px;height:5px;background:#07C160;border-radius:50%;flex-shrink:0;"></div>
+                    <span id="s2-on-kaomoji" style="font-family:'SF Mono',monospace;font-size:11px;color:#475569;letter-spacing:1px;">(=･ω･=)</span>
+                    <span id="s2-on-label" style="font-size:12px;color:#475569;">银荒 · 雪豹</span>
+                  </div>
+                  <span style="font-size:14px;color:#4b5563;">›</span>
                 </div>
               </div>
-              <span class="sig-arr">›</span>
             </div>
           </div>
         </div>
-        <div class="density-label dl-mid">● 里程碑节点 · 反应内嵌卡片 · 情绪加深</div>
+        <div class="density-label dl-mid">Buddy 人格播报 · 数据不变 · 语气变了</div>
 
-        <!-- 规则速查 -->
-        <div style="background:#f8f9fa;border-radius:10px;padding:14px 14px;margin:4px 0 8px;border:1px solid #e5e7eb;">
-          <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;">Buddy 出现规则</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="width:6px;height:6px;background:#07C160;border-radius:50%;flex-shrink:0;"></span>
-              <span style="font-size:12px;color:#374151;flex:1;">每张公益卡底部签名</span>
-              <span style="font-size:10px;color:#9ca3af;">始终</span>
+        <!-- 架构说明 -->
+        <div style="background:#f8f9fa;border-radius:10px;padding:12px 14px;margin:4px 0 8px;border:1px solid #e5e7eb;">
+          <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;">播报路由逻辑</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <span style="font-size:11px;color:#818cf8;font-weight:700;flex-shrink:0;">OFF</span>
+              <span style="font-size:12px;color:#374151;">大 Agent → Skill A/B/C 正常执行 → 结果卡 sig 区附签名层</span>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="width:6px;height:6px;background:#818cf8;border-radius:50%;flex-shrink:0;"></span>
-              <span style="font-size:12px;color:#374151;flex:1;">/goodBuddy 主动召唤</span>
-              <span style="font-size:10px;color:#9ca3af;">随时</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="width:6px;height:6px;background:#818cf8;border-radius:50%;flex-shrink:0;"></span>
-              <span style="font-size:12px;color:#374151;flex:1;">完成好事 · 里程碑节点</span>
-              <span style="font-size:10px;color:#9ca3af;">内嵌卡片</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0;"></span>
-              <span style="font-size:12px;color:#374151;flex:1;">第一次召唤 · 重要节点</span>
-              <span style="font-size:10px;color:#9ca3af;">半屏登场</span>
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <span style="font-size:11px;color:#07C160;font-weight:700;flex-shrink:0;">ON</span>
+              <span style="font-size:12px;color:#374151;">做完好事 → GOODBUDDY Skill 接管结果 → 同数据 · Buddy 人格包装返回</span>
             </div>
           </div>
+          <div style="margin-top:8px;padding-top:8px;border-top:0.5px solid #e5e7eb;font-size:11px;color:#d1d5db;">Buddy 只在做好事之后出现，不单独触发</div>
         </div>
 
       </div>
@@ -507,20 +675,485 @@
       </div>
     </div>
 
+    <!-- ══════════════════════════════════
+         Scene 4 · 播报效果
+         同一套数据 · 五种性格 · 看语气差异
+    ══════════════════════════════════ -->
+    <div class="scene" id="scene-4">
+      <!-- 性格切换器 -->
+      <div class="persona-pills">
+        <button class="persona-pill active" onclick="switchPersonality(0)">温柔·雪豹</button>
+        <button class="persona-pill" onclick="switchPersonality(1)">可爱·小熊猫</button>
+        <button class="persona-pill" onclick="switchPersonality(2)">话痨·黑颈鹤</button>
+        <button class="persona-pill" onclick="switchPersonality(3)">神秘·江豚</button>
+        <button class="persona-pill" onclick="switchPersonality(4)">搞笑·藏狐</button>
+      </div>
+
+      <div class="chat-area">
+        <!-- 对比提示 -->
+        <div style="background:#f0faf4;border-radius:8px;padding:10px 12px;border:1px solid #d1fae5;margin-bottom:2px;">
+          <div style="font-size:11.5px;color:#065f46;font-weight:600;margin-bottom:2px;">📻 播报模式 · 8 张卡 · 5 种性格</div>
+          <div style="font-size:10.5px;color:#065f46;opacity:0.85;line-height:1.55;">切上方胶囊看同一套数据在不同性格嘴里怎么说。往下滑能看全部 8 个场景：捐步 / 小红花 / 野朋友 / 步数不够 / 里程碑 / 模糊意图 / 项目推荐 / 捐款完成。</div>
+        </div>
+
+        <!-- ── 卡片 1：捐步成功（宠物日记本） ── -->
+        <div class="user-row"><div class="user-bubble">帮我捐一下今天的步数</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">好，8,432 步已捐出。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;">
+            <!-- 日记头 + 日记正文 -->
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-steps-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-steps-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-steps-species">雪豹</span>
+                  <span class="date">今天 · ✓ 捐步</span>
+                </div>
+                <div class="bcast-line" id="s4-steps-line">今天8,432步走完了，换成了一块0.84公里的候鸟栖地。这是我们陪你走的第12天。</div>
+              </div>
+            </div>
+            <!-- 精简数据附录：整合成一行 -->
+            <div class="bcast-note streak">
+              <div class="item"><b>8,432</b><span class="u">步</span></div>
+              <div class="item"><b>0.84</b><span class="u">km 栖地</span></div>
+              <div class="item"><b class="hl">🌸+1</b></div>
+              <div class="item"><b>🔥12</b><span class="u">天</span></div>
+            </div>
+            <!-- 视觉辅助：本周进度点 -->
+            <div class="bcast-viz">
+              <div class="bw-row">
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">一</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">二</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">三</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">四</div></div>
+                <div class="bw-d"><div class="bw-dot today"></div><div class="bw-lbl today-l">今天</div></div>
+                <div class="bw-d"><div class="bw-dot"></div><div class="bw-lbl">六</div></div>
+                <div class="bw-d"><div class="bw-dot"></div><div class="bw-lbl">日</div></div>
+              </div>
+              <div class="btog-inline" style="margin-top:8px;">
+                <div class="btog-av"><div class="btog-a a1">李</div><div class="btog-a a2">王</div><div class="btog-a me">你</div></div>
+                <div class="btog-t">你是今天第 <b>12,453</b> 个</div>
+              </div>
+            </div>
+            <button class="bbtn-o" style="margin-top:8px;">了解项目进展</button>
+            <button class="bbtn-g">提醒我明日捐步</button>
+          </div>
+        </div>
+        <div class="density-label dl-mid">↑ 宠物日记本 · 点卡片 → 看 ta 累积的详情</div>
+
+        <!-- ── 卡片 2：小红花 ── -->
+        <div class="time-sep">查询小红花</div>
+        <div class="user-row"><div class="user-bubble">查一下我的小红花</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">查到了，你的小红花余额：</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;border-left-color:#ff9f43;">
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-flower-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-flower-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-flower-species">雪豹</span>
+                  <span class="date">今天 · 🌸 小红花</span>
+                </div>
+                <div class="bcast-line" id="s4-flower-line">你一共有1,234朵小红花了。这个月多了47朵——47次你做过的小事，我都记在花园里。</div>
+              </div>
+            </div>
+            <div class="bcast-note">
+              <div class="item"><b>1,234</b><span class="u">朵</span></div>
+              <div class="item"><b class="hl">+47</b><span class="u">本月</span></div>
+              <div class="item"><b>47</b><span class="u">次好事</span></div>
+              <div class="item"><b>12</b><span class="u">个项目</span></div>
+            </div>
+            <div class="bfl-strip">
+              <div class="bfl-n">1,234<span class="u">朵</span></div>
+              <span class="bfl-e">🌸</span>
+            </div>
+            <button class="bbtn-o" style="margin-top:8px;">打开我的花园</button>
+            <button class="bbtn-p">再种一朵</button>
+          </div>
+        </div>
+
+        <!-- ── 卡片 3：野朋友打卡 ── -->
+        <div class="time-sep">野朋友打卡</div>
+        <div class="user-row"><div class="user-bubble">我拍到一只鸟，帮我提交野朋友</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">照片收到，已提交野朋友计划。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;">
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-wild-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-wild-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-wild-species">雪豹</span>
+                  <span class="date">今天 · 🦢 野朋友</span>
+                </div>
+                <div class="bcast-line" id="s4-wild-line">你拍的那只鸟，AI说是东方白鹳（八成没错）。照片送到科研那边了，它今天上崇明的档案又多一笔。</div>
+              </div>
+            </div>
+            <div class="bwl-photo">
+              <span class="tag">崇明 · 2026-05-07</span>
+              <span class="bird">🦢</span>
+            </div>
+            <div class="bcast-note">
+              <div class="item"><b>东方白鹳</b></div>
+              <div class="item"><b class="hl">87%</b><span class="u">置信度</span></div>
+              <div class="item"><b>23</b><span class="u">累计</span></div>
+              <div class="item"><b>8</b><span class="u">物种</span></div>
+            </div>
+            <button class="bbtn-o" style="margin-top:8px;">看我的野朋友图鉴</button>
+            <button class="bbtn-g">再拍一张</button>
+          </div>
+        </div>
+
+        <!-- ── 卡片 4：步数不足 ── -->
+        <div class="time-sep">步数不够</div>
+        <div class="user-row"><div class="user-bubble">看下今天的捐步</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">今天走了 2,217 步，还没到 6,000 门槛。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;border-left-color:#b0853d;">
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-low-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-low-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-low-species">雪豹</span>
+                  <span class="date">今天 · · 进行中</span>
+                </div>
+                <div class="bcast-line" id="s4-low-line">今天2,217步，还差3,783步就能换一顿村校孩子的热饭。不着急，下午还长。我在。</div>
+              </div>
+            </div>
+            <div class="bcast-note">
+              <div class="item"><b>2,217</b><span class="u">/ 6,000</span></div>
+              <div class="item"><b>37%</b></div>
+              <div class="item">还差 <b class="hl">3,783</b><span class="u">步</span></div>
+            </div>
+            <div class="bcast-viz">
+              <div class="bpb-t"><div class="bpb-f" style="width:37%;"></div></div>
+            </div>
+            <div class="bpr" style="margin-top:8px;">
+              <div class="bpr-l"><span class="bpr-i">🍳</span><span class="bpr-n">帮村校孩子做一顿好饭</span></div>
+              <span class="bpr-a">了解项目 ›</span>
+            </div>
+            <button class="bbtn-o">今天直接捐一笔</button>
+            <button class="bbtn-g">明天这个时候提醒我</button>
+          </div>
+        </div>
+
+        <!-- ── 卡片 5：里程碑 ── -->
+        <div class="time-sep">连续 30 天</div>
+        <div class="user-row"><div class="user-bubble">看看我的捐步战绩</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">你已经连续捐步 30 天。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;border-left-color:#8b5cf6;">
+            <div class="bcast-say" style="background:#f7f3fb;border-bottom-color:#e8dff0;">
+              <div class="bcast-face snow" id="s4-milestone-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-milestone-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-milestone-species">雪豹</span>
+                  <span class="date">🔥 里程碑</span>
+                </div>
+                <div class="bcast-line" id="s4-milestone-line">整整30天了。我数过，一天都没落——这件事，我身边很少有人能做到。</div>
+              </div>
+            </div>
+            <div class="bms-strip">
+              <span class="bms-b">🔥 30 天</span>
+              <span class="bms-n">连续达成</span>
+              <span class="bms-s">今日公益金翻倍</span>
+            </div>
+            <div class="bcast-note">
+              <div class="item"><b>30</b><span class="u">天连续</span></div>
+              <div class="item"><b>8,234</b><span class="u">今日步数</span></div>
+              <div class="item"><b class="hl">×2</b><span class="u">公益金</span></div>
+            </div>
+            <div class="bcast-viz">
+              <div class="bw-row">
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">一</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">二</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">三</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">四</div></div>
+                <div class="bw-d"><div class="bw-dot today"></div><div class="bw-lbl today-l">今天</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">六</div></div>
+                <div class="bw-d"><div class="bw-dot done"></div><div class="bw-lbl">日</div></div>
+              </div>
+            </div>
+            <button class="bbtn-p" style="background:#8b5cf6;margin-top:8px;">确认捐出 · 留住这个时刻</button>
+            <button class="bbtn-g">只捐步，不分享</button>
+          </div>
+        </div>
+
+        <!-- ── 卡片 6：模糊意图 ── -->
+        <div class="time-sep">想做点好事</div>
+        <div class="user-row"><div class="user-bubble">我想做点好事</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">好，先帮你收窄一下方向。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" style="border-left-color:#b8a970;">
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-intent-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-intent-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-intent-species">雪豹</span>
+                  <span class="date">· 起意</span>
+                </div>
+                <div class="bcast-line" id="s4-intent-line">想帮谁？挑一个就行。上次你选"孩子"那次，小琴写了一封回信，记得吗？</div>
+              </div>
+            </div>
+            <div class="bopt">
+              <div class="bopt-i"><span class="e">👧🏻</span>孩子<span class="s">教育·成长·温饱</span></div>
+              <div class="bopt-i"><span class="e">👵🏻</span>老人<span class="s">独居·失能·关怀</span></div>
+              <div class="bopt-i"><span class="e">🐱</span>小动物<span class="s">流浪·救助·领养</span></div>
+              <div class="bopt-i"><span class="e">🎲</span>随便一个<span class="s">今天缺钱的</span></div>
+            </div>
+            <div style="height:10px;"></div>
+          </div>
+        </div>
+
+        <!-- ── 卡片 7：项目推荐 ── -->
+        <div class="time-sep">挑好项目</div>
+        <div class="user-row"><div class="user-bubble">给我推荐一个</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">帮你找到一个：</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;">
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-proj-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-proj-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-proj-species">雪豹</span>
+                  <span class="date">· 推荐</span>
+                </div>
+                <div class="bcast-line" id="s4-proj-line">小琴10岁，云南临沧，想上学但家里没钱。这家基金会做了10年——平台这边每笔钱都查得到。</div>
+              </div>
+            </div>
+            <div class="bph">
+              <span class="bph-o">春蕾计划 · 上海联劝公益基金会</span>
+            </div>
+            <div class="bcast-note">
+              <div class="item"><b class="hl">78%</b><span class="u">已筹</span></div>
+              <div class="item"><b>¥78</b><span class="u">万 / 100万</span></div>
+              <div class="item"><b>3</b><span class="u">位朋友帮过</span></div>
+            </div>
+            <div class="bcast-viz">
+              <div class="bpb-t"><div class="bpb-f" style="width:78%;"></div></div>
+            </div>
+            <div class="btrust" style="padding-top:8px;">
+              <span class="btrust-c">平台 10 年</span>
+              <span class="btrust-c">善款追溯</span>
+              <span class="btrust-c">区块链存证</span>
+            </div>
+            <button class="bbtn-p" style="margin-top:2px;">我想帮一下</button>
+            <button class="bbtn-g">换一个</button>
+          </div>
+        </div>
+
+        <!-- ── 卡片 8：捐款完成 ── -->
+        <div class="time-sep">捐款完成</div>
+        <div class="user-row"><div class="user-bubble">确认捐 20 元</div></div>
+        <div class="msg-row">
+          <div class="agent-avatar">益</div>
+          <div class="agent-bubble">支付成功，¥20 已托管。</div>
+        </div>
+        <div class="card-wrap">
+          <div class="card bcast-card" onclick="openBuddyDetail()" style="cursor:pointer;border-left-color:#e8413c;">
+            <div class="bcast-say">
+              <div class="bcast-face snow" id="s4-done-face">(=･ω･=)</div>
+              <div class="bcast-bubble">
+                <div class="bcast-name">
+                  <span id="s4-done-name">白日</span>
+                  <span class="dot">·</span>
+                  <span class="species" id="s4-done-species">雪豹</span>
+                  <span class="date">今天 · ✓ 完成</span>
+                </div>
+                <div class="bcast-line" id="s4-done-line">¥20帮你转到「春蕾计划」了。钱现在在腾讯公益托管——大概一个月后有回音，我替你盯着。</div>
+              </div>
+            </div>
+            <div class="bdn-strip">
+              <div class="bdn-m">✓</div>
+              <div class="bdn-a">¥20</div>
+              <div class="bdn-w">→ 春蕾计划</div>
+            </div>
+            <div class="bcast-note">
+              <div class="item"><b>¥20</b></div>
+              <div class="item"><b>春蕾计划</b></div>
+              <div class="item"><b class="hl">+1</b><span class="u">🌸</span></div>
+              <div class="item">回音约 <b>1</b><span class="u">个月</span></div>
+            </div>
+            <div class="bcast-viz">
+              <div class="bff-h-row">
+                <div class="step active"><div class="d"></div><div class="l">已托管</div></div>
+                <div class="step"><div class="d"></div><div class="l">3天拨付</div></div>
+                <div class="step"><div class="d"></div><div class="l">2周执行</div></div>
+                <div class="step"><div class="d"></div><div class="l">1月回访</div></div>
+              </div>
+            </div>
+            <button class="bbtn-p" style="margin-top:10px;">把这朵花带到我的状态</button>
+            <button class="bbtn-g">先不分享</button>
+          </div>
+        </div>
+
+        <div style="height:12px;"></div>
+      </div>
+      <div class="input-bar">
+        <span class="input-icon">⊕</span>
+        <div class="input-field">发消息</div>
+        <span class="input-icon">🎤</span>
+      </div>
+    </div>
+
     <!-- Dim + 半屏 -->
     <div class="dim" id="dim" onclick="closeHalfscreen()"></div>
     <div class="halfscreen" id="halfscreen">
       <div class="hs-handle"></div>
       <button class="hs-close" onclick="closeHalfscreen()">✕</button>
       <div class="hs-body">
-        <div class="hs-view active" id="hs-summon">
-          <div class="summon-label">正在寻找你的伙伴</div>
+        <!-- 激活后状态卡 · 日常 tap sig › 看到的内容 -->
+        <div class="hs-view" id="hs-status" style="background:#080812;justify-content:flex-start;padding-top:24px;overflow-y:auto;">
+          <div class="buddy-stage-wrap" onclick="triggerReaction()" style="margin-bottom:10px;">
+            <div class="buddy-stage" id="status-stage"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+            <span class="species-name" id="st-name" style="font-size:16px;"></span>
+            <span class="rarity-badge" id="st-rarity"></span>
+          </div>
+          <!-- Buddy 当次的一句话 -->
+          <div class="dialogue-wrap" style="margin-bottom:18px;">
+            <div class="dialogue-bubble-dark">
+              <p id="st-line" style="font-size:13.5px;color:#e2e8f0;line-height:1.65;min-height:1.65em;"></p>
+            </div>
+          </div>
+          <!-- 三个关键计数 · 关系感 -->
+          <div style="display:flex;gap:16px;margin-bottom:20px;">
+            <div style="text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#f1f5f9;" id="st-deeds">47</div>
+              <div style="font-size:10px;color:#374151;letter-spacing:1px;margin-top:3px;">件好事</div>
+            </div>
+            <div style="width:1px;background:#1e293b;"></div>
+            <div style="text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#f1f5f9;" id="st-days">30</div>
+              <div style="font-size:10px;color:#374151;letter-spacing:1px;margin-top:3px;">天陪伴</div>
+            </div>
+            <div style="width:1px;background:#1e293b;"></div>
+            <div style="text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#f59e0b;" id="st-flowers">1,234</div>
+              <div style="font-size:10px;color:#374151;letter-spacing:1px;margin-top:3px;">🌸 小红花</div>
+            </div>
+          </div>
+          <!-- 累积数据：最近做过 -->
+          <div style="width:86%;margin-bottom:14px;">
+            <div style="font-size:10px;color:#475569;letter-spacing:2px;margin-bottom:8px;">我们一起做过的事</div>
+            <div style="background:#0f172a;border-radius:10px;border:1px solid #1e293b;overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #1e293b;">
+                <span style="font-size:16px;">🦢</span>
+                <div style="flex:1;">
+                  <div style="font-size:12px;color:#e2e8f0;">野朋友 · 东方白鹳</div>
+                  <div style="font-size:10px;color:#64748b;">今天 · 崇明</div>
+                </div>
+                <span style="font-size:10px;color:#94a3b8;">+1🌸</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #1e293b;">
+                <span style="font-size:16px;">👣</span>
+                <div style="flex:1;">
+                  <div style="font-size:12px;color:#e2e8f0;">捐步 · 8,432 步</div>
+                  <div style="font-size:10px;color:#64748b;">今天 · 守护湿地 0.84km</div>
+                </div>
+                <span style="font-size:10px;color:#94a3b8;">+1🌸</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;">
+                <span style="font-size:16px;">👧🏻</span>
+                <div style="flex:1;">
+                  <div style="font-size:12px;color:#e2e8f0;">春蕾计划 · ¥20</div>
+                  <div style="font-size:10px;color:#64748b;">3 天前 · 云南临沧</div>
+                </div>
+                <span style="font-size:10px;color:#94a3b8;">+1🌸</span>
+              </div>
+            </div>
+          </div>
+          <!-- 累积数据：陪伴时间线 -->
+          <div style="width:86%;margin-bottom:24px;">
+            <div style="font-size:10px;color:#475569;letter-spacing:2px;margin-bottom:8px;">陪伴日历 · 本月</div>
+            <div style="background:#0f172a;border-radius:10px;border:1px solid #1e293b;padding:10px 12px;">
+              <div style="display:grid;grid-template-columns:repeat(15,1fr);gap:3px;">
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#059669;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#059669;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#059669;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#10b981;border-radius:2px;"></span>
+                <span style="height:10px;background:#f59e0b;border-radius:2px;box-shadow:0 0 6px #f59e0b;"></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#475569;">
+                <span>4月22日</span><span>15 天无间断</span><span>今天</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 出生故事 · 寄生激活 tap 后先显示 ~2s · 然后淡入召唤扫描 -->
+        <div class="hs-view" id="hs-birth" style="background:#080812;gap:0;">
+          <div class="birth-egg">🥚</div>
+          <div class="birth-cause" id="birth-cause">因为你的捐步</div>
+          <div class="birth-title">即将诞生</div>
+          <div class="birth-sub">正在寻找与你有缘的伙伴…</div>
+        </div>
+
+        <div class="hs-view" id="hs-summon">
+          <div class="summon-label">正在寻找与你有缘的伙伴</div>
           <div class="hash-box" id="hash-box">· · · · · · · ·</div>
           <div class="scan-list">
             <div class="scan-row"><span class="scan-lbl">物种</span><div class="scan-track"><div class="scan-fill" id="f0"></div></div><span class="scan-val" id="v0"></span></div>
             <div class="scan-row"><span class="scan-lbl">性格</span><div class="scan-track"><div class="scan-fill" id="f1"></div></div><span class="scan-val" id="v1"></span></div>
-            <div class="scan-row"><span class="scan-lbl">名字</span><div class="scan-track"><div class="scan-fill" id="f2"></div></div><span class="scan-val" id="v2"></span></div>
+            <div class="scan-row"><span class="scan-lbl">稀有度</span><div class="scan-track"><div class="scan-fill" id="f2"></div></div><span class="scan-val" id="v2"></span></div>
           </div>
+        </div>
+
+        <!-- 命名步骤 · 用户给 Buddy 起名字 -->
+        <div class="hs-view" id="hs-name">
+          <div class="name-animal-display" id="name-animal-art"></div>
+          <div class="name-species-row">
+            <span class="species-name" id="name-species" style="font-size:15px;"></span>
+            <span class="rarity-badge" id="name-rarity"></span>
+          </div>
+          <div class="name-prompt">给它一个名字</div>
+          <input class="name-input" id="name-input" type="text" maxlength="4" placeholder="····" autocomplete="off" oninput="onNameInput(this)">
+          <button class="name-confirm" id="name-confirm" onclick="submitName()">就叫这个</button>
         </div>
         <div class="hs-view" id="hs-reveal">
           <div class="buddy-stage-wrap" onclick="triggerReaction()">
@@ -573,17 +1206,17 @@
   ];
   const PERSONALITIES = [
     { label:'温柔', lines:['嗯，你来了。','我在这里。一直都在。','等你好久了。'], tapLines:['轻点……','嗯？','……你叫我？'], idleLines:['今天风很轻。','……','嗯。'] },
-    { label:'毒舌', lines:['哦，你终于来了。','……稀奇，你真来了。','我还以为你不来了。'], tapLines:['干什么。','……','手痒吗？'], idleLines:['无聊。','……还在看？','哼。'] },
+    { label:'可爱', lines:['嘿嘿你来啦～','哇你回来了！','诶嘿嘿嘿嘿嘿。'], tapLines:['呀！','痒痒的～','再来一下～'], idleLines:['咦？','～','嘿嘿。'] },
     { label:'话痨', lines:['你好你好！我叫——等等你已经知道了。那今天风从哪边来你知道吗？','啊你来了！我有好多话想说……','终于！我刚才遇到了一件特别有意思的事——'], tapLines:['啊！','你点我！','欸欸欸！'], idleLines:['你在看我吗？','我刚想到一件事——','哦对了——'] },
     { label:'神秘', lines:['有些事你不做，它也会发生。你做了，它就属于你。','你和我相遇，不是偶然算出来的。','今天风从西边来。你也是西边来的吗？'], tapLines:['……','你感觉到了吗。','嗯。'], idleLines:['……','风变了。','有什么来了。'] },
-    { label:'倔强', lines:['……你忘了什么吗？没事，我记着。','来了。好。','不用解释。来了就行。'], tapLines:['……知道了。','嗯。','……'], idleLines:['……','等你呢。','还在。'] }
+    { label:'搞笑', lines:['哟，上班的来咯。','我先声明啊，我没偷吃你的小红花。','别问，问就是困。'], tapLines:['诶！','别戳！','哈？'], idleLines:['呼——','……我在想今晚吃啥。','咳咳。'] }
   ];
   const NAMES = {
     snow_leopard:['白日','冬至','银荒','霜降','暮云'],
-    red_panda:   ['火炭','橘落','红叶','煤球','炉边'],
+    red_panda:   ['火炭','橘落','糯米','煤球','豆沙'],
     crane:       ['苍空','晴川','鸣远','云渡','归迟'],
     porpoise:    ['细浪','江心','清涛','浅灰','墨水'],
-    fox:         ['漠然','淡风','平原','石面','远坡']
+    fox:         ['方脸','土豆','憨憨','一本','懵懵']
   };
 
   function djb2(s){let h=5381;for(let i=0;i<s.length;i++)h=(Math.imul(h,33)^s.charCodeAt(i))>>>0;return h;}
@@ -610,15 +1243,24 @@
   }
 
   // ── 半屏 ──────────────────────────────────
-  function openHalfscreen(){
-    buddy=generate(makeSeed());
+  function openHalfscreen(cause){
+    if(!buddy) buddy=generate(makeSeed()); // 已激活则复用同一只，首次才生成
     [0,1,2].forEach(i=>{const f=document.getElementById('f'+i);f.style.transition='none';f.style.width='0%';const v=document.getElementById('v'+i);v.style.opacity='0';v.textContent='';});
-    document.getElementById('hs-summon').classList.add('active');
+    document.getElementById('hs-birth').classList.remove('active');
+    document.getElementById('hs-summon').classList.remove('active');
     document.getElementById('hs-reveal').classList.remove('active');
     document.getElementById('share-overlay').classList.remove('show');
     document.getElementById('halfscreen').classList.add('open');
     document.getElementById('dim').classList.add('active');
-    setTimeout(()=>{[0,1,2].forEach(i=>document.getElementById('f'+i).style.transition='width 0.9s cubic-bezier(0.4,0,0.2,1)');runSummon();},80);
+    // 先显示出生故事
+    if(cause){document.getElementById('birth-cause').textContent=cause;}
+    document.getElementById('hs-birth').classList.add('active');
+    // 2s 后淡出 · 进入召唤扫描
+    setTimeout(()=>{
+      document.getElementById('hs-birth').classList.remove('active');
+      document.getElementById('hs-summon').classList.add('active');
+      setTimeout(()=>{[0,1,2].forEach(i=>document.getElementById('f'+i).style.transition='width 0.9s cubic-bezier(0.4,0,0.2,1)');runSummon();},80);
+    },2000);
   }
   function closeHalfscreen(){stopAnimations();document.getElementById('halfscreen').classList.remove('open');document.getElementById('dim').classList.remove('active');}
   function closeWithMessage(){closeHalfscreen();}
@@ -629,9 +1271,64 @@
     let i=0;el.textContent='#'+'·'.repeat(8);
     const t=setInterval(()=>{i++;el.textContent=full.slice(0,i)+'·'.repeat(Math.max(0,9-i));if(i>=9)clearInterval(t);},130);
     const scan=(idx,val,delay)=>setTimeout(()=>{document.getElementById('f'+idx).style.width='100%';setTimeout(()=>{const v=document.getElementById('v'+idx);v.textContent=val;v.style.opacity='1';},700);},delay);
-    scan(0,buddy.animal.name,700);scan(1,buddy.personality.label,1400);scan(2,buddy.name,2100);
-    setTimeout(showReveal,3500);
+    scan(0,buddy.animal.name,700);
+    scan(1,buddy.personality.label,1400);
+    scan(2,buddy.rarity,2100);
+    setTimeout(showNameInput,3500);
   }
+
+  function showNameInput(){
+    const b=buddy;
+    document.getElementById('hs-summon').classList.remove('active');
+    // 填充命名页
+    document.getElementById('name-animal-art').textContent=(b.animal.states.idle).join('\n');
+    document.getElementById('name-species').textContent=b.animal.name+' · '+b.personality.label;
+    const rb=document.getElementById('name-rarity');rb.textContent=b.rarity;rb.className='rarity-badge rarity-'+b.rarity;
+    document.getElementById('name-input').value='';
+    document.getElementById('name-confirm').classList.remove('ready');
+    document.getElementById('hs-name').classList.add('active');
+    setTimeout(()=>document.getElementById('name-input').focus(),300);
+  }
+
+  function onNameInput(el){
+    const val=el.value.trim();
+    const btn=document.getElementById('name-confirm');
+    if(val.length>0){btn.classList.add('ready');}else{btn.classList.remove('ready');}
+  }
+
+  function submitName(){
+    const val=document.getElementById('name-input').value.trim();
+    if(!val)return;
+    buddy.userName=val;
+    document.getElementById('hs-name').classList.remove('active');
+    refreshBuddyLabels();
+    showReveal();
+  }
+
+  // ── 全局 Buddy 标签同步 ─────────────────
+  function refreshBuddyLabels(){
+    if(!buddy)return;
+    const name=buddy.userName||buddy.name;
+    const label=name+' · '+buddy.animal.name;
+    const face=buddy.animal.states.idle[1]||buddy.animal.states.idle[0];
+    // 名字
+    const askEl=document.getElementById('ask-buddy-name');
+    if(askEl)askEl.textContent=name;
+    const s2sn=document.getElementById('s2-status-name');
+    if(s2sn)s2sn.textContent=name;
+    // 签名标签
+    ['s1-sig-label','s2-off-label','s2-on-label'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=label;});
+    // 颜文字
+    ['sig-face','s2-off-kaomoji','s2-on-kaomoji'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&!el.classList.contains('heart'))el.textContent=face;
+    });
+  }
+
+  // 页面加载时用默认 Buddy 先填一遍
+  buddy=generate(makeSeed());
+  refreshBuddyLabels();
+  randomizeSig();
 
   function showReveal(){
     const b=buddy;
@@ -643,10 +1340,10 @@
     document.getElementById('r-species').textContent=b.animal.name;
     const rb=document.getElementById('r-rarity');rb.textContent=b.rarity;rb.className='rarity-badge rarity-'+b.rarity;
     document.getElementById('r-status').textContent=b.animal.status+' · 腾讯公益野朋友计划';
-    document.getElementById('r-name').textContent=b.name;
+    document.getElementById('r-name').textContent=b.userName||b.name;
     const pt=document.getElementById('r-personality');pt.textContent=b.personality.label;pt.className='personality-tag pt-'+b.rarity;
     document.getElementById('r-hash').textContent=b.seed+' · #'+b.h.toString(16).slice(0,6);
-    document.getElementById('r-from').textContent=b.name+' · '+b.animal.name;
+    document.getElementById('r-from').textContent=(b.userName||b.name)+' · '+b.animal.name;
     typewriter(b.line);
     document.getElementById('hs-summon').classList.remove('active');
     revealEl.classList.add('active');
@@ -685,6 +1382,111 @@
   }
   function retry(){stopAnimations();document.getElementById('hs-reveal').classList.remove('active');document.getElementById('share-overlay').classList.remove('show');document.getElementById('tap-hint').style.opacity='1';openHalfscreen();}
 
+  // ── 随机签名层状态 ──────────────────────
+  function randomizeSig(){
+    if(!buddy) return;
+    const isHeart = Math.random() < 0.20;
+    const face = document.getElementById('sig-face');
+    const spark = document.getElementById('sig-spark');
+    // 用当前 Buddy 的 idle/happy 表情，不硬编码
+    const idleLines = buddy.animal.states.idle;
+    const happyLines = buddy.animal.states.happy;
+    const normalFace = idleLines[1] || idleLines[0];
+    const happyFace  = happyLines[1] || happyLines[0];
+    if(isHeart){
+      face.textContent = happyFace;
+      face.classList.add('heart');
+      spark.style.display='inline';
+    } else {
+      face.textContent = normalFace;
+      face.classList.remove('heart');
+      spark.style.display='none';
+    }
+  }
+  // randomizeSig 已在 refreshBuddyLabels 块末尾调用，此处不重复
+
+  // ── 激活后状态卡半屏 ────────────────────
+  function openStatusScreen(){
+    if(!buddy) buddy = generate(makeSeed());
+    const b = buddy;
+    // 判断是爱心状态还是普通
+    const sigFace = document.getElementById('sig-face');
+    const isHeart = sigFace && sigFace.classList.contains('heart');
+    const state = isHeart ? 'happy' : 'idle';
+    const lines = isHeart ? ['……今天心情不错。','嗯。你来了。','……'] : b.personality.lines;
+    const line = isHeart ? lines[0] : lines[Math.floor(Math.random()*lines.length)];
+
+    // 重置所有 hs-view
+    ['hs-birth','hs-summon','hs-reveal','hs-status'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    document.getElementById('share-overlay').classList.remove('show');
+    document.getElementById('halfscreen').classList.add('open');
+    document.getElementById('dim').classList.add('active');
+
+    // 填充状态卡内容
+    const stage = document.getElementById('status-stage');
+    stage.textContent = (b.animal.states[state]||b.animal.states.idle).join('\n');
+    stage.style.animation = `${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
+    document.getElementById('st-name').textContent = (b.userName||b.name) + ' · ' + b.animal.name;
+    const rb = document.getElementById('st-rarity');
+    rb.textContent = b.rarity; rb.className = 'rarity-badge rarity-'+b.rarity;
+    const lineEl = document.getElementById('st-line');
+    lineEl.textContent = '';
+    let i=0;
+    const t=setInterval(()=>{lineEl.textContent=line.slice(0,i);i++;if(i>line.length)clearInterval(t);},60);
+
+    // 固定累积数据（也可从后端取）
+    document.getElementById('st-deeds').textContent = 47;
+    document.getElementById('st-days').textContent = 30;
+    const fe = document.getElementById('st-flowers');
+    if(fe) fe.textContent = '1,234';
+
+    document.getElementById('hs-status').classList.add('active');
+  }
+
+  // Tab 4 播报卡 → 打开 Buddy 详情（直接展示累积数据，不走命名流程）
+  function openBuddyDetail(){
+    // 用当前 Tab4 选中的性格生成对应 Buddy，保证物种匹配
+    const p = BROADCAST_DATA[currentPersona];
+    const animal = ANIMALS[p.animalIdx];
+    if(!buddy || buddy.animal.id !== animal.id){
+      // 造一个匹配当前性格的 buddy（跳过命名流程，用默认名）
+      buddy = {
+        animal: animal,
+        personality: PERSONALITIES[p.animalIdx] || PERSONALITIES[0],
+        rarity: 'SR',
+        name: BROADCAST_DEFAULT_NAMES[animal.id],
+        userName: BROADCAST_DEFAULT_NAMES[animal.id],
+        line: p.steps, // 用当前场景的日记作为一句话
+        seed: 'persona_'+currentPersona,
+        h: Math.floor(Math.random()*0xffffffff)
+      };
+    }
+    openStatusScreen();
+  }
+
+  // Tab 1 · 开启助手播报模式
+  function enableBuddyMode(){
+    // 简单反馈：打勾 + 切到 Tab 2 看播报效果
+    showToast('✓ 已开启助手播报');
+    setTimeout(()=>switchScene(2), 600);
+  }
+  function skipBuddyMode(){
+    showToast('好的，以后可以说"开启 Buddy"再启动');
+  }
+  function showToast(msg){
+    let t = document.getElementById('global-toast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = 'global-toast';
+      t.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.82);color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;z-index:500;opacity:0;transition:opacity 0.2s;pointer-events:none;';
+      document.querySelector('.phone').appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._tid);
+    t._tid = setTimeout(()=>{ t.style.opacity = '0'; }, 1500);
+  }
+
   function showShareCard(){
     const b=buddy;
     const card=document.getElementById('share-card');
@@ -693,6 +1495,126 @@
     document.getElementById('share-overlay').classList.add('show');
   }
   function hideShareCard(){document.getElementById('share-overlay').classList.remove('show');}
+
+  // ── Scene 4 · 播报效果 ─────────────────────
+  // 5 动物 × 5 性格 × 8 场景 —— 宠物日记本
+  // 核心：每句话要关于这次"项目/事"本身，不是空说套话
+  //   温柔·雪豹   → 安静、记事、像日记
+  //   可爱·小熊猫 → 嘿嘿/哇/啦/～/✨，软糯撒娇
+  //   话痨·黑颈鹤 → 感叹号密集、岔题、惊喜
+  //   神秘·江豚   → 留白、意象、"风/水/光/迹"
+  //   搞笑·藏狐   → 自黑懵脸狐、跑题、冷笑话式认真
+  const BROADCAST_DATA = [
+    // 0 温柔 · 雪豹
+    { animalIdx:0,
+      steps:    '今天8,432步走完了，换成了一块0.84公里的候鸟栖地。这是我们陪你走的第12天。',
+      flower:   '你一共有1,234朵小红花了。这个月多了47朵——47次你做过的小事，我都记在花园里。',
+      wildlife: '你拍的那只鸟，AI说是东方白鹳（八成没错）。照片送到科研那边了，它今天上崇明的档案又多一笔。',
+      low:      '今天2,217步，还差3,783步就能换一顿村校孩子的热饭。不着急，下午还长。我在。',
+      milestone:'整整30天了。我数过，一天都没落——这件事，我身边很少有人能做到。',
+      intent:   '想帮谁？挑一个就行。上次你选"孩子"那次，小琴写了一封回信，记得吗？',
+      proj:     '小琴10岁，云南临沧，想上学但家里没钱。这家基金会做了10年——平台这边每笔钱都查得到。',
+      done:     '¥20帮你转到「春蕾计划」了。钱现在在腾讯公益托管——大概一个月后有回音，我替你盯着。'
+    },
+    // 1 可爱 · 小熊猫
+    { animalIdx:1,
+      steps:    '哇你今天走了8,432步耶！换成了0.84公里的候鸟家～候鸟要住新房子啦！',
+      flower:   '嘿嘿～你有1,234朵小红花啦！这个月又多了47朵，我帮你挨个擦亮啦✨',
+      wildlife: '哇你拍到了东方白鹳！好漂亮！AI说有87%可能是它哦～崇明那边会记下来的！',
+      low:      '才2,217步呀？还差3,783步～没事，我陪你下午一起走走，走到就能给小朋友做饭啦！',
+      milestone:'哇！30天！30天！你真的好棒好棒！我给你鼓掌（啪啪啪啪啪）！',
+      intent:   '嘿嘿想做好事啦？孩子、老人、小动物、或者随便一个都可以～你最心软哪个？',
+      proj:     '小琴～10岁～想上学的那个小妹妹！这家基金会做了10年啦，超靠谱的！',
+      done:     '成功啦！¥20已经飞到春蕾那边啦～嘿嘿花已经种上啦，等1个月给你看开花～🌸'
+    },
+    // 2 话痨 · 黑颈鹤
+    { animalIdx:2,
+      steps:    '8,432步！你知道这意味着什么吗！0.84公里栖地！候鸟要乐疯了！我都替它们开心！连续12天了你！',
+      flower:   '1,234朵啊！这个月47朵！我刚才差点算错——但没错！1,234！每一朵都记着的！要看花园吗要看吗！',
+      wildlife: '东方白鹳！置信度87%！崇明那边的记录又增加了！科学家要看的！这特别重要！你拍得也特别棒！',
+      low:      '才2,217？！没事没事！下午还那么长！一起走走走！走到村校孩子能吃饭为止！我陪你！',
+      milestone:'天哪30天！整整一个月！我数了！一次都没断！你知道这个比率多低吗！反正特别低！',
+      intent:   '哦哦哦好多方向！孩子老人动物都好！你最想帮哪个！我跟你说每个我都想聊！你先选一个吧快！',
+      proj:     '这个超好！春蕾计划！小琴！云南临沧！上海联劝10年！我查了年报！每笔都能追！我差点哭了！',
+      done:     '成了！¥20！春蕾！托管腾讯公益！3天拨付！2周执行！1个月回访！我都记下了！全都记下了！'
+    },
+    // 3 神秘 · 江豚
+    { animalIdx:3,
+      steps:    '步数已归于湿地。候鸟不问你叫什么名字，只问你今天来没来。你来了第12次。',
+      flower:   '一千两百三十四。每一朵都留着印记。花园是有记忆的地方，你每来一次，它都认识你深一点。',
+      wildlife: '那只鸟有了名字：东方白鹳。图像入档。它不知道有人在看它，但有人在看它。',
+      low:      '两千两百一十七步。下午的光还没斜。有些事还没来——但你已经出发了。',
+      milestone:'三十日。每一日都落进水里。水记得。你不必记，水记得。',
+      intent:   '你要帮的那个人，风已经知道了。你只需要指一个方向，它会替你找到。',
+      proj:     '这一程里有她。小琴。十年的人在前面等过千百个你。今天是你。',
+      done:     '二十元入水。你不必看它到哪里去——它到得了。一个月后，水会回话。'
+    },
+    // 4 搞笑 · 藏狐
+    { animalIdx:4,
+      steps:    '8,432步——牛啊，我平时一天蹲坑都没这么多步数。候鸟多了0.84km栖地，感谢你，候鸟感谢你，我替候鸟喝一杯。',
+      flower:   '1,234朵？我数到300脸就僵了（虽然本来就是僵的）。反正挺多的，信我。',
+      wildlife: '你拍的这只鸟AI说是东方白鹳。我仔细看了，嗯，是个鸟。我作为一只动物负责任地告诉你：这个鸟比我帅。',
+      low:      '2,217步？这不叫捐步，这叫起床走去厕所。村校厨房先挂起来，你下午再加加油，我替厨师稳住他别生气。',
+      milestone:'30天！30天啊！我脸都僵了（本来就是僵的）！这要是在藏狐圈里，相当于连续蹲守30天没跟丢老鼠，封神！',
+      intent:   '帮谁呢？孩子老人动物随便——我选随便。不是我敷衍啊，是我真的分不清人类小孩和老人，对我来说都一样圆。',
+      proj:     '小琴，10岁，想上学。这家基金会10年老店，比我可靠（我才3岁半）。就她了吧，我都替你决定了。',
+      done:     '¥20！成功起飞！钱不是我花的，但我替你紧张了一下（藏狐的脸紧张起来也看不出来）。一个月后叫你回来看回音。'
+    }
+  ];
+
+  // 各动物在播报 Tab 的默认显示名（无 buddy 或动物不匹配时）
+  const BROADCAST_DEFAULT_NAMES = {
+    snow_leopard:'白日', red_panda:'糯米', crane:'苍空', porpoise:'细浪', fox:'方脸'
+  };
+
+  let currentPersona = 0;
+
+  function switchPersonality(idx){
+    currentPersona = idx;
+    const p = BROADCAST_DATA[idx];
+    const a = ANIMALS[p.animalIdx];
+    // 用完整多行 idle 形状，不再只取脸那一行
+    const face = a.states.idle.join('\n');
+    // 动物→文字颜色类
+    const faceClassMap = { snow_leopard:'snow', red_panda:'red', crane:'crane', porpoise:'porpoise', fox:'fox' };
+    const faceClass = faceClassMap[a.id] || 'snow';
+    // 如果用户激活了对应动物的 Buddy，用 Buddy 的名字；否则用默认名
+    let displayName = BROADCAST_DEFAULT_NAMES[a.id];
+    if(buddy && buddy.animal.id === a.id) displayName = buddy.userName || buddy.name;
+    const speciesName = a.name;
+
+    // 切换 pill 样式
+    document.querySelectorAll('.persona-pill').forEach((btn, i) => btn.classList.toggle('active', i === idx));
+
+    // 更新 8 张日记卡：face+class / 名字 / 物种 / 日记正文
+    const cards = [
+      { face:'s4-steps-face',     name:'s4-steps-name',     species:'s4-steps-species',     line:'s4-steps-line',     key:'steps'    },
+      { face:'s4-flower-face',    name:'s4-flower-name',    species:'s4-flower-species',    line:'s4-flower-line',    key:'flower'   },
+      { face:'s4-wild-face',      name:'s4-wild-name',      species:'s4-wild-species',      line:'s4-wild-line',      key:'wildlife' },
+      { face:'s4-low-face',       name:'s4-low-name',       species:'s4-low-species',       line:'s4-low-line',       key:'low'      },
+      { face:'s4-milestone-face', name:'s4-milestone-name', species:'s4-milestone-species', line:'s4-milestone-line', key:'milestone'},
+      { face:'s4-intent-face',    name:'s4-intent-name',    species:'s4-intent-species',    line:'s4-intent-line',    key:'intent'   },
+      { face:'s4-proj-face',      name:'s4-proj-name',      species:'s4-proj-species',      line:'s4-proj-line',      key:'proj'     },
+      { face:'s4-done-face',      name:'s4-done-name',      species:'s4-done-species',      line:'s4-done-line',      key:'done'     }
+    ];
+    cards.forEach(c => {
+      const fe = document.getElementById(c.face);
+      const ne = document.getElementById(c.name);
+      const se = document.getElementById(c.species);
+      const le = document.getElementById(c.line);
+      if(fe){
+        fe.textContent = face;
+        fe.classList.remove('snow','red','crane','porpoise','fox');
+        fe.classList.add(faceClass);
+      }
+      if(ne) ne.textContent = displayName;
+      if(se) se.textContent = speciesName;
+      if(le) le.textContent = p[c.key];
+    });
+  }
+
+  // 页面初始化时同步 Tab4 默认状态（雪豹 · 温柔）
+  switchPersonality(0);
 
   // ── 分享传播 · 随机刷新 ───────────────────
   function regenerateShare(){
