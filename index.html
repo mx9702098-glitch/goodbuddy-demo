@@ -170,10 +170,15 @@
 
     /* 出生故事 */
     #hs-birth{background:#080812;gap:0;}
-    .birth-egg{font-size:48px;margin-bottom:28px;animation:floatGentle 3.5s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(245,158,11,0.35));}
-    .birth-cause{font-size:11px;color:#92400e;letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:4px 14px;}
+    .birth-egg{font-size:54px;margin-bottom:28px;animation:eggBreath 2.6s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(245,158,11,0.45));position:relative;}
+    @keyframes eggBreath{
+      0%,100%{transform:translateY(0) rotate(-2deg) scale(1);filter:drop-shadow(0 0 18px rgba(245,158,11,0.35));}
+      45%{transform:translateY(-4px) rotate(2deg) scale(1.04);filter:drop-shadow(0 0 28px rgba(245,158,11,0.6));}
+      55%{transform:translateY(-2px) rotate(2deg) scale(1.04);filter:drop-shadow(0 0 28px rgba(245,158,11,0.6));}
+    }
+    .birth-cause{font-size:11px;color:#92400e;letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:4px 14px;animation:summonBreathe 2.4s ease-in-out infinite;}
     .birth-title{font-size:20px;font-weight:900;color:#f1f5f9;letter-spacing:3px;margin-bottom:8px;}
-    .birth-sub{font-size:12px;color:#334155;letter-spacing:1px;}
+    .birth-sub{font-size:12px;color:#334155;letter-spacing:1px;animation:summonBreathe 2.4s ease-in-out infinite;animation-delay:0.4s;}
     @keyframes fadeToSummon{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
 
     /* 命名步骤 */
@@ -188,8 +193,10 @@
 
     /* 召唤 */
     #hs-summon{background:#080812;}
-    .summon-label{font-size:11px;letter-spacing:3px;color:#374151;margin-bottom:28px;text-transform:uppercase;}
+    .summon-label{font-size:11px;letter-spacing:3px;color:#374151;margin-bottom:28px;text-transform:uppercase;animation:summonBreathe 2.4s ease-in-out infinite;}
+    @keyframes summonBreathe{0%,100%{opacity:0.55;}50%{opacity:1;}}
     .hash-box{font-family:"SF Mono","Fira Code",monospace;font-size:14px;color:#07C160;background:rgba(7,193,96,0.05);border:1px solid rgba(7,193,96,0.12);border-radius:8px;padding:10px 20px;letter-spacing:2px;margin-bottom:32px;}
+    .summon-tip{margin-top:24px;font-size:10.5px;letter-spacing:2px;color:#475569;animation:summonBreathe 2.4s ease-in-out infinite;}
     .scan-list{width:260px;display:flex;flex-direction:column;gap:20px;}
     .scan-row{display:flex;align-items:center;gap:12px;}
     .scan-lbl{font-size:11px;letter-spacing:1px;color:#4b5563;width:36px;}
@@ -1135,10 +1142,13 @@
 
         <div class="hs-view" id="hs-summon">
           <div class="summon-label">正在寻找与你有缘的伙伴</div>
-          <div class="hash-box" id="hash-box" style="opacity:0.4;">· · · · · · · ·</div>
+          <div class="hash-box" id="hash-box">· · · · · · · ·</div>
           <div class="scan-list">
             <div class="scan-row"><span class="scan-lbl">物种</span><div class="scan-track"><div class="scan-fill" id="f0"></div></div><span class="scan-val" id="v0"></span></div>
+            <div class="scan-row"><span class="scan-lbl">性格</span><div class="scan-track"><div class="scan-fill" id="f1"></div></div><span class="scan-val" id="v1"></span></div>
+            <div class="scan-row"><span class="scan-lbl">稀有度</span><div class="scan-track"><div class="scan-fill" id="f2"></div></div><span class="scan-val" id="v2"></span></div>
           </div>
+          <div class="summon-tip" id="summon-tip">缘分匹配中…</div>
         </div>
 
         <!-- 命名步骤 · 用户给 Buddy 起名字 -->
@@ -1238,36 +1248,49 @@
   // ── 半屏 ──────────────────────────────────
   function openHalfscreen(cause){
     if(!buddy) buddy=generate(makeSeed()); // 已激活则复用同一只，首次才生成
-    [0].forEach(i=>{const f=document.getElementById('f'+i);if(f){f.style.transition='none';f.style.width='0%';}const v=document.getElementById('v'+i);if(v){v.style.opacity='0';v.textContent='';}});
+    [0,1,2].forEach(i=>{const f=document.getElementById('f'+i);if(f){f.style.transition='none';f.style.width='0%';}const v=document.getElementById('v'+i);if(v){v.style.opacity='0';v.textContent='';}});
+    const tip=document.getElementById('summon-tip');if(tip)tip.textContent='缘分匹配中…';
     document.getElementById('hs-birth').classList.remove('active');
     document.getElementById('hs-summon').classList.remove('active');
     document.getElementById('hs-reveal').classList.remove('active');
     document.getElementById('share-overlay').classList.remove('show');
     document.getElementById('halfscreen').classList.add('open');
     document.getElementById('dim').classList.add('active');
-    // 先显示出生故事
+    // 先显示出生故事 · 慢一点酝酿
     if(cause){document.getElementById('birth-cause').textContent=cause;}
     document.getElementById('hs-birth').classList.add('active');
-    // 2s 后淡出 · 进入召唤扫描
+    // 3.2s 后淡出 · 进入召唤扫描
     setTimeout(()=>{
       document.getElementById('hs-birth').classList.remove('active');
       document.getElementById('hs-summon').classList.add('active');
-      setTimeout(()=>{const f=document.getElementById('f0');if(f)f.style.transition='width 0.9s cubic-bezier(0.4,0,0.2,1)';runSummon();},80);
-    },2000);
+      setTimeout(()=>{[0,1,2].forEach(i=>{const f=document.getElementById('f'+i);if(f)f.style.transition='width 1.1s cubic-bezier(0.4,0,0.2,1)';});runSummon();},80);
+    },3200);
   }
   function closeHalfscreen(){stopAnimations();document.getElementById('halfscreen').classList.remove('open');document.getElementById('dim').classList.remove('active');}
   function closeWithMessage(){closeHalfscreen();}
 
   function runSummon(){
     const el=document.getElementById('hash-box');
-    el.textContent='· · · · · · · ·'; // 静默装饰，不再展示 hash
+    const full='#'+buddy.h.toString(16).padStart(8,'0');
+    let i=0;el.textContent='#'+'·'.repeat(8);
+    // hash 一位一位浮现，慢一点 → 仪式感
+    const t=setInterval(()=>{i++;el.textContent=full.slice(0,i)+'·'.repeat(Math.max(0,9-i));if(i>=9)clearInterval(t);},220);
+    // 三行扫描，每行间隔 1.6s，总 ~5s
     const scan=(idx,val,delay)=>setTimeout(()=>{
       const f=document.getElementById('f'+idx); if(!f) return;
       f.style.width='100%';
-      setTimeout(()=>{const v=document.getElementById('v'+idx);if(v){v.textContent=val;v.style.opacity='1';}},700);
+      setTimeout(()=>{const v=document.getElementById('v'+idx);if(v){v.textContent=val;v.style.opacity='1';}},900);
     },delay);
-    scan(0,buddy.animal.name,700);
-    setTimeout(showNameInput,2200);
+    scan(0,buddy.animal.name,1200);
+    scan(1,buddy.personality.label,2800);
+    scan(2,buddy.rarity,4400);
+    // 提示文案分阶段更新
+    const tip=document.getElementById('summon-tip');
+    setTimeout(()=>{if(tip)tip.textContent='物种已锁定…';},2100);
+    setTimeout(()=>{if(tip)tip.textContent='正在感应性格…';},3700);
+    setTimeout(()=>{if(tip)tip.textContent='测算缘分稀有度…';},5300);
+    setTimeout(()=>{if(tip)tip.textContent='它来了。';},6500);
+    setTimeout(showNameInput,7000);
   }
 
   function showNameInput(){
