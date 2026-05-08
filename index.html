@@ -183,7 +183,7 @@
 
     /* 命名步骤 */
     #hs-name{background:#080812;gap:0;}
-    .name-animal-display{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:14px;line-height:1.65;color:#e2e8f0;text-align:center;letter-spacing:3px;white-space:pre;margin-bottom:16px;}
+    .name-animal-display{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:14px;line-height:1.4;color:#e4c6f0;text-align:left;letter-spacing:0;white-space:pre;display:inline-block;margin-bottom:16px;font-weight:700;text-shadow:0 0 1px #e4c6f0,0 0 8px rgba(195,155,211,0.4);}
     .name-species-row{display:flex;align-items:center;gap:8px;margin-bottom:28px;}
     .name-prompt{font-size:12px;color:#374151;letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;}
     .name-input{width:220px;background:transparent;border:none;border-bottom:1.5px solid #1e3a5f;color:#f1f5f9;font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;padding:8px 0;font-family:inherit;outline:none;caret-color:#07C160;}
@@ -221,6 +221,11 @@
     .buddy-stage-wrap{cursor:pointer;user-select:none;margin-bottom:18px;}
     .buddy-stage{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:14px;line-height:1.4;color:#e4c6f0;text-align:left;letter-spacing:0;white-space:pre;display:inline-block;font-weight:700;text-shadow:0 0 1px #e4c6f0,0 0 8px rgba(195,155,211,0.4);}
     .buddy-stage.reacting{animation:buddyBounce 0.5s ease both !important;}
+    /* 揭晓页：名字 · 物种 一行 */
+    .reveal-identity{display:flex;align-items:baseline;gap:8px;margin:2px 0 4px;}
+    .reveal-identity .buddy-name{font-size:20px;font-weight:700;color:#f1f5f9;letter-spacing:4px;}
+    .reveal-identity .identity-dot{color:#475569;font-size:14px;}
+    .reveal-identity .identity-species{font-size:13px;color:#cbd5e1;letter-spacing:2px;}
     /* 揭晓页：特征值 stats 条 · 只保留横条（不要数字） */
     .reveal-stats{width:82%;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;font-family:"SF Mono","Fira Code",monospace;}
     .reveal-stat-row{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center;font-size:10.5px;}
@@ -373,27 +378,43 @@
     /* 分享卡预览层 */
     .share-overlay{position:absolute;inset:0;z-index:200;background:#04040a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:opacity 0.35s;}
     .share-overlay.show{opacity:1;pointer-events:all;}
-    .share-card{width:260px;border-radius:16px;overflow:hidden;}
-    .sc-inner{padding:26px 22px 22px;display:flex;flex-direction:column;align-items:center;}
+    .share-card{width:280px;border-radius:16px;overflow:hidden;}
+    .sc-inner{padding:24px 20px 20px;display:flex;flex-direction:column;align-items:center;}
     .sc-N  {background:linear-gradient(160deg,#111827,#1f2937);border:1px solid #374151;}
     .sc-R  {background:linear-gradient(160deg,#0c1a2e,#1e3a5f);border:1px solid #1d4ed8;}
     .sc-SR {background:linear-gradient(160deg,#180d2e,#3b1065);border:1px solid #7c3aed;}
     .sc-SSR{background:linear-gradient(160deg,#1c1205,#3d2400);border:1px solid #d97706;}
-    .sc-ascii{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:15px;line-height:1.6;letter-spacing:3px;white-space:pre;text-align:center;margin-bottom:14px;}
-    .sc-N  .sc-ascii{color:#9ca3af;text-shadow:0 0 16px rgba(107,114,128,0.4);}
-    .sc-R  .sc-ascii{color:#93c5fd;text-shadow:0 0 16px rgba(59,130,246,0.5);}
-    .sc-SR .sc-ascii{color:#d8b4fe;text-shadow:0 0 16px rgba(147,51,234,0.6);}
-    .sc-SSR .sc-ascii{color:#fde68a;text-shadow:0 0 20px rgba(245,158,11,0.8),0 0 50px rgba(245,158,11,0.3);}
-    .sc-rar{font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:6px;}
-    .sc-N .sc-rar{color:#6b7280;}.sc-R .sc-rar{color:#60a5fa;}.sc-SR .sc-rar{color:#c084fc;}.sc-SSR .sc-rar{color:#fbbf24;}
-    .sc-name{font-size:22px;font-weight:900;letter-spacing:7px;margin-bottom:4px;}
+    .sc-ascii{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:13px;line-height:1.4;letter-spacing:0;white-space:pre;text-align:left;margin-bottom:18px;font-weight:700;display:inline-block;}
+    .sc-N  .sc-ascii{color:#c7ccd3;text-shadow:0 0 14px rgba(107,114,128,0.4);}
+    .sc-R  .sc-ascii{color:#bfdbfe;text-shadow:0 0 14px rgba(59,130,246,0.5);}
+    .sc-SR .sc-ascii{color:#e9d5ff;text-shadow:0 0 14px rgba(147,51,234,0.6);}
+    .sc-SSR .sc-ascii{color:#fde68a;text-shadow:0 0 20px rgba(245,158,11,0.7),0 0 50px rgba(245,158,11,0.25);}
+    /* 分享卡：名字 · 物种 一行 */
+    .sc-identity{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+    .sc-name{font-size:19px;font-weight:800;letter-spacing:3px;}
     .sc-N .sc-name{color:#f1f5f9;}.sc-R .sc-name{color:#eff6ff;}.sc-SR .sc-name{color:#faf5ff;}.sc-SSR .sc-name{color:#fffbeb;}
-    .sc-sp{font-size:11px;letter-spacing:1px;margin-bottom:14px;}
-    .sc-N .sc-sp{color:#4b5563;}.sc-R .sc-sp{color:#3b82f6;opacity:0.7;}.sc-SR .sc-sp{color:#9333ea;opacity:0.7;}.sc-SSR .sc-sp{color:#d97706;opacity:0.7;}
-    .sc-div{width:40px;height:1px;margin-bottom:12px;}
+    .sc-species{font-size:12px;letter-spacing:2px;opacity:0.75;}
+    .sc-identity-dot{opacity:0.5;font-size:12px;}
+    .sc-sp{font-size:10px;letter-spacing:1.5px;margin-bottom:14px;opacity:0.6;}
+    .sc-N .sc-sp{color:#9ca3af;}.sc-R .sc-sp{color:#93c5fd;}.sc-SR .sc-sp{color:#c084fc;}.sc-SSR .sc-sp{color:#fbbf24;}
+    .sc-div{width:40px;height:1px;margin-bottom:14px;}
     .sc-N .sc-div{background:#374151;}.sc-R .sc-div{background:#1d4ed8;opacity:0.5;}.sc-SR .sc-div{background:#7c3aed;opacity:0.5;}.sc-SSR .sc-div{background:#d97706;opacity:0.6;}
-    .sc-quote{font-size:12px;line-height:1.7;text-align:center;font-style:italic;margin-bottom:16px;}
-    .sc-N .sc-quote{color:#6b7280;}.sc-R .sc-quote{color:#93c5fd;}.sc-SR .sc-quote{color:#d8b4fe;}.sc-SSR .sc-quote{color:#fde68a;}
+    /* 分享卡：5 条特征值 */
+    .sc-stats{width:100%;display:flex;flex-direction:column;gap:7px;margin-bottom:14px;font-family:"SF Mono","Fira Code",monospace;}
+    .sc-stat-row{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;font-size:9px;}
+    .sc-stat-lbl{letter-spacing:1px;opacity:0.55;}
+    .sc-stat-bar{height:7px;border-radius:999px;overflow:hidden;}
+    .sc-N .sc-stat-bar{background:rgba(156,163,175,0.12);border:1px solid rgba(156,163,175,0.2);}
+    .sc-R .sc-stat-bar{background:rgba(147,197,253,0.12);border:1px solid rgba(147,197,253,0.25);}
+    .sc-SR .sc-stat-bar{background:rgba(216,180,254,0.12);border:1px solid rgba(216,180,254,0.25);}
+    .sc-SSR .sc-stat-bar{background:rgba(253,230,138,0.12);border:1px solid rgba(253,230,138,0.3);}
+    .sc-stat-bar i{display:block;height:100%;border-radius:999px;}
+    .sc-N .sc-stat-bar i{background:linear-gradient(90deg,#d1d5db,#9ca3af);}
+    .sc-R .sc-stat-bar i{background:linear-gradient(90deg,#bfdbfe,#60a5fa);}
+    .sc-SR .sc-stat-bar i{background:linear-gradient(90deg,#e9d5ff,#c084fc);}
+    .sc-SSR .sc-stat-bar i{background:linear-gradient(90deg,#fde68a,#f59e0b);}
+    .sc-quote{font-size:11px;line-height:1.7;text-align:center;font-style:italic;margin-bottom:14px;}
+    .sc-N .sc-quote{color:#9ca3af;}.sc-R .sc-quote{color:#bfdbfe;}.sc-SR .sc-quote{color:#d8b4fe;}.sc-SSR .sc-quote{color:#fde68a;}
     .sc-brand{font-size:10px;letter-spacing:2px;}
     .sc-N .sc-brand{color:#1f2937;}.sc-R .sc-brand{color:#1e3a5f;}.sc-SR .sc-brand{color:#2d1b5e;}.sc-SSR .sc-brand{color:#3d2400;}
     .share-tip{font-size:12px;color:#374151;letter-spacing:1px;}
@@ -1173,16 +1194,16 @@
             <div class="buddy-stage" id="buddy-stage"></div>
           </div>
           <div class="tap-hint" id="tap-hint">· 点我 ·</div>
-          <div class="species-row">
-            <span class="species-name" id="r-species"></span>
-          </div>
-          <div class="status-line" id="r-status"></div>
-          <div class="buddy-name-wrap" style="margin-bottom:20px;">
+          <!-- 名字 · 物种（一行，小圆点隔开） -->
+          <div class="reveal-identity">
             <span class="buddy-name" id="r-name"></span>
+            <span class="identity-dot">·</span>
+            <span class="identity-species" id="r-species"></span>
           </div>
-          <!-- 5 条特征值 · 只保留横条本身 -->
+          <div class="status-line" id="r-status" style="margin-bottom:18px;"></div>
+          <!-- 5 条特征值 · 只保留横条 -->
           <div class="reveal-stats" id="r-stats"></div>
-          <!-- 它对你说的第一句话 · 放在特征值下方 -->
+          <!-- 它对你说的第一句话 -->
           <div class="dialogue-wrap" style="margin-top:6px;">
             <div class="dialogue-bubble-dark">
               <p id="r-line"><span class="cursor"></span></p>
@@ -1762,7 +1783,25 @@
     const displayName = b.userName || b.name;
     card.className='share-card sc-'+b.rarity;
     const happyFrame = (b.animal.frames && b.animal.frames[Math.min(2, b.animal.frames.length-1)]) || b.animal.states.happy.join('\n');
-    card.innerHTML=`<div class="sc-inner"><div class="sc-ascii">${happyFrame}</div><div class="sc-name">${displayName}</div><div class="sc-sp">${b.animal.name} · ${b.animal.status}</div><div class="sc-div"></div><div class="sc-quote">"${b.line}"</div><div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div></div>`;
+    const statsHtml = (Array.isArray(b.animal.stats)? b.animal.stats : []).map(([k,v])=>`
+      <div class="sc-stat-row">
+        <div class="sc-stat-lbl">${k}</div>
+        <div class="sc-stat-bar"><i style="width:${Math.max(0,Math.min(100,v))}%"></i></div>
+      </div>`).join('');
+    card.innerHTML=`
+      <div class="sc-inner">
+        <div class="sc-ascii">${happyFrame}</div>
+        <div class="sc-identity">
+          <span class="sc-name">${displayName}</span>
+          <span class="sc-identity-dot">·</span>
+          <span class="sc-species">${b.animal.name}</span>
+        </div>
+        <div class="sc-sp">${b.animal.status} · 腾讯公益野朋友计划</div>
+        <div class="sc-div"></div>
+        <div class="sc-stats">${statsHtml}</div>
+        <div class="sc-quote">"${b.animal.quote || b.line}"</div>
+        <div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div>
+      </div>`;
     document.getElementById('share-overlay').classList.add('show');
   }
   function hideShareCard(){document.getElementById('share-overlay').classList.remove('show');}
