@@ -1043,7 +1043,6 @@
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
             <span class="species-name" id="st-name" style="font-size:16px;"></span>
-            <span class="rarity-badge" id="st-rarity"></span>
           </div>
           <!-- Buddy 当次的一句话 -->
           <div class="dialogue-wrap" style="margin-bottom:18px;">
@@ -1136,11 +1135,9 @@
 
         <div class="hs-view" id="hs-summon">
           <div class="summon-label">正在寻找与你有缘的伙伴</div>
-          <div class="hash-box" id="hash-box">· · · · · · · ·</div>
+          <div class="hash-box" id="hash-box" style="opacity:0.4;">· · · · · · · ·</div>
           <div class="scan-list">
             <div class="scan-row"><span class="scan-lbl">物种</span><div class="scan-track"><div class="scan-fill" id="f0"></div></div><span class="scan-val" id="v0"></span></div>
-            <div class="scan-row"><span class="scan-lbl">性格</span><div class="scan-track"><div class="scan-fill" id="f1"></div></div><span class="scan-val" id="v1"></span></div>
-            <div class="scan-row"><span class="scan-lbl">稀有度</span><div class="scan-track"><div class="scan-fill" id="f2"></div></div><span class="scan-val" id="v2"></span></div>
           </div>
         </div>
 
@@ -1149,7 +1146,6 @@
           <div class="name-animal-display" id="name-animal-art"></div>
           <div class="name-species-row">
             <span class="species-name" id="name-species" style="font-size:15px;"></span>
-            <span class="rarity-badge" id="name-rarity"></span>
           </div>
           <div class="name-prompt">给它一个名字</div>
           <input class="name-input" id="name-input" type="text" maxlength="4" placeholder="····" autocomplete="off" oninput="onNameInput(this)">
@@ -1162,14 +1158,11 @@
           <div class="tap-hint" id="tap-hint">· 点我 ·</div>
           <div class="species-row">
             <span class="species-name" id="r-species"></span>
-            <span class="rarity-badge" id="r-rarity"></span>
           </div>
           <div class="status-line" id="r-status"></div>
-          <div class="buddy-name-wrap">
+          <div class="buddy-name-wrap" style="margin-bottom:14px;">
             <span class="buddy-name" id="r-name"></span>
-            <span class="personality-tag" id="r-personality"></span>
           </div>
-          <div class="buddy-hash" id="r-hash"></div>
           <div class="dialogue-wrap">
             <div class="dialogue-bubble-dark">
               <p id="r-line"><span class="cursor"></span></p>
@@ -1245,7 +1238,7 @@
   // ── 半屏 ──────────────────────────────────
   function openHalfscreen(cause){
     if(!buddy) buddy=generate(makeSeed()); // 已激活则复用同一只，首次才生成
-    [0,1,2].forEach(i=>{const f=document.getElementById('f'+i);f.style.transition='none';f.style.width='0%';const v=document.getElementById('v'+i);v.style.opacity='0';v.textContent='';});
+    [0].forEach(i=>{const f=document.getElementById('f'+i);if(f){f.style.transition='none';f.style.width='0%';}const v=document.getElementById('v'+i);if(v){v.style.opacity='0';v.textContent='';}});
     document.getElementById('hs-birth').classList.remove('active');
     document.getElementById('hs-summon').classList.remove('active');
     document.getElementById('hs-reveal').classList.remove('active');
@@ -1259,7 +1252,7 @@
     setTimeout(()=>{
       document.getElementById('hs-birth').classList.remove('active');
       document.getElementById('hs-summon').classList.add('active');
-      setTimeout(()=>{[0,1,2].forEach(i=>document.getElementById('f'+i).style.transition='width 0.9s cubic-bezier(0.4,0,0.2,1)');runSummon();},80);
+      setTimeout(()=>{const f=document.getElementById('f0');if(f)f.style.transition='width 0.9s cubic-bezier(0.4,0,0.2,1)';runSummon();},80);
     },2000);
   }
   function closeHalfscreen(){stopAnimations();document.getElementById('halfscreen').classList.remove('open');document.getElementById('dim').classList.remove('active');}
@@ -1267,14 +1260,14 @@
 
   function runSummon(){
     const el=document.getElementById('hash-box');
-    const full='#'+buddy.h.toString(16).padStart(8,'0');
-    let i=0;el.textContent='#'+'·'.repeat(8);
-    const t=setInterval(()=>{i++;el.textContent=full.slice(0,i)+'·'.repeat(Math.max(0,9-i));if(i>=9)clearInterval(t);},130);
-    const scan=(idx,val,delay)=>setTimeout(()=>{document.getElementById('f'+idx).style.width='100%';setTimeout(()=>{const v=document.getElementById('v'+idx);v.textContent=val;v.style.opacity='1';},700);},delay);
+    el.textContent='· · · · · · · ·'; // 静默装饰，不再展示 hash
+    const scan=(idx,val,delay)=>setTimeout(()=>{
+      const f=document.getElementById('f'+idx); if(!f) return;
+      f.style.width='100%';
+      setTimeout(()=>{const v=document.getElementById('v'+idx);if(v){v.textContent=val;v.style.opacity='1';}},700);
+    },delay);
     scan(0,buddy.animal.name,700);
-    scan(1,buddy.personality.label,1400);
-    scan(2,buddy.rarity,2100);
-    setTimeout(showNameInput,3500);
+    setTimeout(showNameInput,2200);
   }
 
   function showNameInput(){
@@ -1282,8 +1275,7 @@
     document.getElementById('hs-summon').classList.remove('active');
     // 填充命名页
     document.getElementById('name-animal-art').textContent=(b.animal.states.idle).join('\n');
-    document.getElementById('name-species').textContent=b.animal.name+' · '+b.personality.label;
-    const rb=document.getElementById('name-rarity');rb.textContent=b.rarity;rb.className='rarity-badge rarity-'+b.rarity;
+    document.getElementById('name-species').textContent=b.animal.name;
     document.getElementById('name-input').value='';
     document.getElementById('name-confirm').classList.remove('ready');
     document.getElementById('hs-name').classList.add('active');
@@ -1338,11 +1330,8 @@
     const stage=document.getElementById('buddy-stage');
     stage.style.animation=`${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
     document.getElementById('r-species').textContent=b.animal.name;
-    const rb=document.getElementById('r-rarity');rb.textContent=b.rarity;rb.className='rarity-badge rarity-'+b.rarity;
     document.getElementById('r-status').textContent=b.animal.status+' · 腾讯公益野朋友计划';
     document.getElementById('r-name').textContent=b.userName||b.name;
-    const pt=document.getElementById('r-personality');pt.textContent=b.personality.label;pt.className='personality-tag pt-'+b.rarity;
-    document.getElementById('r-hash').textContent=b.seed+' · #'+b.h.toString(16).slice(0,6);
     document.getElementById('r-from').textContent=(b.userName||b.name)+' · '+b.animal.name;
     typewriter(b.line);
     document.getElementById('hs-summon').classList.remove('active');
@@ -1427,8 +1416,6 @@
     stage.textContent = (b.animal.states[state]||b.animal.states.idle).join('\n');
     stage.style.animation = `${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
     document.getElementById('st-name').textContent = (b.userName||b.name) + ' · ' + b.animal.name;
-    const rb = document.getElementById('st-rarity');
-    rb.textContent = b.rarity; rb.className = 'rarity-badge rarity-'+b.rarity;
     const lineEl = document.getElementById('st-line');
     lineEl.textContent = '';
     let i=0;
