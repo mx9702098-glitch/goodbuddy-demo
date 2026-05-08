@@ -219,8 +219,17 @@
     @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
     .buddy-stage-wrap{cursor:pointer;user-select:none;margin-bottom:18px;}
-    .buddy-stage{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:17px;line-height:1.65;color:#e2e8f0;text-align:center;letter-spacing:3px;white-space:pre;display:inline-block;}
+    .buddy-stage{font-family:"SF Mono","Fira Code","Courier New",monospace;font-size:14px;line-height:1.4;color:#e4c6f0;text-align:left;letter-spacing:0;white-space:pre;display:inline-block;font-weight:700;text-shadow:0 0 1px #e4c6f0,0 0 8px rgba(195,155,211,0.4);}
     .buddy-stage.reacting{animation:buddyBounce 0.5s ease both !important;}
+    /* 揭晓页：气质一句心声 */
+    .reveal-quote{font-size:12px;color:#c39bd3;letter-spacing:1px;background:rgba(195,155,211,0.08);border:1px solid rgba(195,155,211,0.25);border-radius:20px;padding:6px 14px;margin:4px 0 14px;max-width:82%;text-align:center;line-height:1.5;}
+    /* 揭晓页：特征值 stats 条 */
+    .reveal-stats{width:82%;display:flex;flex-direction:column;gap:8px;margin-bottom:16px;font-family:"SF Mono","Fira Code",monospace;}
+    .reveal-stat-row{display:grid;grid-template-columns:110px 1fr 36px;gap:8px;align-items:center;font-size:10.5px;}
+    .reveal-stat-label{color:#64748b;letter-spacing:1px;}
+    .reveal-stat-bar{height:9px;border-radius:999px;border:1px solid rgba(195,155,211,0.25);background:rgba(255,255,255,0.02);overflow:hidden;}
+    .reveal-stat-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,rgba(195,155,211,0.95),rgba(195,155,211,0.55));border-radius:999px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
+    .reveal-stat-val{color:rgba(195,155,211,0.95);text-align:right;font-size:10.5px;}
     .tap-hint{font-size:10px;color:#1e293b;letter-spacing:1px;margin-top:-10px;margin-bottom:14px;transition:opacity 0.5s;}
 
     .species-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
@@ -262,14 +271,15 @@
     .bcast-face{
       flex-shrink:0;
       font-family:"SF Mono","Fira Code","Courier New",monospace;
-      font-size:10px;
-      line-height:1.25;
-      letter-spacing:0.5px;
+      font-size:9px;
+      line-height:1.2;
+      letter-spacing:0;
       color:#5a4d2f;
       white-space:pre;
-      padding:2px 4px 0 0;
-      min-width:50px;
-      text-align:center;
+      padding:2px 0 0 0;
+      min-width:86px;
+      text-align:left;
+      font-weight:700;
     }
     .bcast-face.snow{color:#4a6a80;}
     .bcast-face.red{color:#8a4a2c;}
@@ -1161,7 +1171,7 @@
           <input class="name-input" id="name-input" type="text" maxlength="4" placeholder="····" autocomplete="off" oninput="onNameInput(this)">
           <button class="name-confirm" id="name-confirm" onclick="submitName()">就叫这个</button>
         </div>
-        <div class="hs-view" id="hs-reveal">
+        <div class="hs-view" id="hs-reveal" style="overflow-y:auto;padding-top:22px;padding-bottom:22px;justify-content:flex-start;">
           <div class="buddy-stage-wrap" onclick="triggerReaction()">
             <div class="buddy-stage" id="buddy-stage"></div>
           </div>
@@ -1170,9 +1180,13 @@
             <span class="species-name" id="r-species"></span>
           </div>
           <div class="status-line" id="r-status"></div>
-          <div class="buddy-name-wrap" style="margin-bottom:14px;">
+          <div class="buddy-name-wrap" style="margin-bottom:10px;">
             <span class="buddy-name" id="r-name"></span>
           </div>
+          <!-- Buddy 的自我介绍 · 气质 + 一句心声 -->
+          <div class="reveal-quote" id="r-quote"></div>
+          <!-- 5 条特征值 · Buddy 的"属性" -->
+          <div class="reveal-stats" id="r-stats"></div>
           <div class="dialogue-wrap">
             <div class="dialogue-bubble-dark">
               <p id="r-line"><span class="cursor"></span></p>
@@ -1195,17 +1209,193 @@
 
   <script>
   // ── DATA ──────────────────────────────────────
+  // 5 只 ASCII 小生物 · 来源：38-会呼吸的ASCII小生物.html
+  // frames 是线性多帧（3-6 帧），380ms 一切换，用于"会呼吸"的动画
+  // stats / mood / quote 是 Buddy 的"人格特征"，只在揭晓页露出
+  function framesToStates(fr){
+    const last = fr.length - 1;
+    return {
+      idle:  fr[0].split('\n'),
+      blink: fr[Math.min(1,last)].split('\n'),
+      happy: fr[Math.min(2,last)].split('\n'),
+      react: fr[last].split('\n'),
+      shy:   fr[Math.min(1,last)].split('\n')
+    };
+  }
+  const FRAMES = {
+    snow_leopard: [
+`    /\\_/\\
+   (\\___/)
+   ( o . o )
+  =(  ...  )=
+   (")_  (")  `,
+`    /\\_/\\
+   (\\___/)
+   ( - . - )
+  =(  ...  )=
+   (")_  (")  `,
+`    /\\_/\\
+   (\\___/)
+   ( o . o )
+  =(  www  )=
+   (")_  (")  `,
+`    /\\_/\\
+   (\\___/)
+   ( o . o )
+  =(  ...  )=
+   (")_  (")~ `
+    ],
+    red_panda: [
+`  /^\\_/^\\
+╮(( ◉ω◉ ))╭
+ )         (
+ ──────────`,
+`  /^\\_/^\\
+╮(( ─ω─ ))╭
+ )         (
+ ──────────`,
+`  /^\\_/^\\
+\\(( ◉w◉ ))/
+ )         (
+ ──────────`,
+`  /^\\_/^\\
+\\(( ─ω◉ ))╭
+ )         (
+ ──────────`
+    ],
+    crane: [
+`    __
+   ( o>
+    \\
+    _(_)_
+    / | \\       `,
+`    __  "
+   ( o>  "
+    \\
+    _(_)_
+    / | \\       `,
+`    __  ""
+   ( o>  "!
+    \\\\
+    _(_)_
+    / | \\       `,
+`    __
+   ( ->  ~
+    \\
+    _(_)_
+    / | \\       `
+    ],
+    porpoise: [
+`
+   ___
+  ( o   )___
+  (_______/
+    ~~  ~~      `,
+`        '
+   ___   '
+  ( o   )___
+  (_______/
+    ~~  ~~      `,
+`       '''
+   ___  '''
+  ( o   )___
+  (_______/
+   ~~  ~~  ~    `,
+`      ''o''
+   ___  '''
+  ( o   )___
+  (_______/
+    ~~  ~~      `,
+`
+   ___
+  ( -   )___
+  (_______/
+    ~~  ~~  ~~  `
+    ],
+    fox: [
+`  /\\   /\\
+ ≡(─   ─)≡
+  (  v  )
+  ╰─────╯
+  ╰╯   ╰╯ `,
+`  /\\   /\\
+ ≡(·   ─)≡
+  (  v  )
+  ╰─────╯
+  ╰╯   ╰╯ `,
+`  /\\   /\\
+ ≡(─   ─)≡
+  (  ω  )
+  ╰─────╯
+  ╰╯   ╰╯ `,
+`  /\\   /\\
+ ≡(>   <)≡
+  (  v  )
+  ╰─────╯
+  ╰╯   ╰╯ `
+    ]
+  };
   const ANIMALS = [
     { id:'snow_leopard', name:'雪豹',  status:'极危物种', floatAnim:'floatGentle', floatDuration:'3.2s',
-      states:{ idle:[' ∧＿∧ ','(=･ω･=)',' )   ( ','(_∪_∪_)'], blink:[' ∧＿∧ ','(=ーωー=)',' )   ( ','(_∪_∪_)'], happy:[' ∧  ∧ ','(=^ω^=)',' )   ( ','(_∪_∪_)'], react:[' ∧  ∧ ','(=oωo=)','/>   <\\','(_∪_∪_)'], shy:[' ∧＿∧ ','(=///=)',' )   ( ','(_∪_∪_)'] } },
-    { id:'red_panda',    name:'小熊猫',status:'易危物种', floatAnim:'floatBouncy', floatDuration:'2.4s',
-      states:{ idle:['(ᐢ. .ᐢ)','( つ ⊂)','  U  U  '], blink:['(ᐢ- -ᐢ)','( つ ⊂)','  U  U  '], happy:['(ᐢ▾▾ᐢ)','(/  \\)','  U  U  '], react:['(ᐢoωoᐢ)','(/ !\\)','  U  U  '], shy:['(ᐢ////ᐢ)','( つ ⊂)','  U  U  '] } },
-    { id:'crane',        name:'黑颈鹤',status:'易危物种', floatAnim:'floatSlow',   floatDuration:'4s',
-      states:{ idle:['   ●   ','  /|   ',' ( |   ',' / ●  '], blink:['   ◉   ','  /|   ',' ( |   ',' / ●  '], happy:['  ●●   ','  /|   ',' ( |   ',' / ●  '], react:['  !●!  ','  \\|   ',' ( |   ',' / ●  '], shy:['   ●   ','  /|   ',' ( /   ',' / ●  '] } },
-    { id:'porpoise',     name:'江豚',  status:'极危物种', floatAnim:'floatGentle', floatDuration:'2.8s',
-      states:{ idle:[' ∿∿●∿∿ ','(･ ω ･)',' ≋≋≋≋≋ '], blink:[' ∿∿●∿∿ ','(ー ω ー)',' ≋≋≋≋≋ '], happy:[' ∿∿●∿∿ ','(^ω ^ )',' ≋≋≋≋≋ '], react:[' ∿∿●∿∿ ','(oω o!)',' ≋≋≋≋≋ '], shy:[' ∿∿●∿∿ ','(///ω )',' ≋≋≋≋≋ '] } },
-    { id:'fox',          name:'藏狐',  status:'无危物种', floatAnim:'floatStiff',  floatDuration:'4.5s',
-      states:{ idle:['/\\_ _/\\','(-___-)','  > □ <','(_/ \\_)'], blink:['/\\_ _/\\','(-----)','  > □ <','(_/ \\_)'], happy:['/\\_ _/\\','(-‿‿-)','  > ▽ <','(_/ \\_)'], react:['/\\_ _/\\','(-!_!-)','  > □ <','(_/ \\_)'], shy:['/\\_ _/\\','(///  )','  > □ <','(_/ \\_)'] } }
+      mood:'温柔', quote:'"今天也只是安静地存在着。"',
+      stats:[
+        ['SOCIAL_BATTERY', 30, '社交电量'],
+        ['OVERTHINKING',   66, '想得多'],
+        ['CHAOS',          22, '混乱度'],
+        ['MEME_LEVEL',     38, '抽象程度'],
+        ['SOFT_MODE',      88, '软萌值']
+      ],
+      frames: FRAMES.snow_leopard,
+      states: framesToStates(FRAMES.snow_leopard)
+    },
+    { id:'red_panda', name:'小熊猫', status:'易危物种', floatAnim:'floatBouncy', floatDuration:'2.4s',
+      mood:'可爱', quote:'"嘿嘿～我就蹭一下。"',
+      stats:[
+        ['SOCIAL_BATTERY', 72, '社交电量'],
+        ['OVERTHINKING',   28, '想得多'],
+        ['CHAOS',          74, '混乱度'],
+        ['MEME_LEVEL',     90, '抽象程度'],
+        ['SOFT_MODE',      62, '软萌值']
+      ],
+      frames: FRAMES.red_panda,
+      states: framesToStates(FRAMES.red_panda)
+    },
+    { id:'crane', name:'黑颈鹤', status:'易危物种', floatAnim:'floatSlow', floatDuration:'4s',
+      mood:'话痨', quote:'"等下我再补一句。"',
+      stats:[
+        ['SOCIAL_BATTERY', 54, '社交电量'],
+        ['OVERTHINKING',   44, '想得多'],
+        ['CHAOS',          58, '混乱度'],
+        ['MEME_LEVEL',     62, '抽象程度'],
+        ['YAP_POWER',      96, '话量']
+      ],
+      frames: FRAMES.crane,
+      states: framesToStates(FRAMES.crane)
+    },
+    { id:'porpoise', name:'江豚', status:'极危物种', floatAnim:'floatGentle', floatDuration:'2.8s',
+      mood:'神秘', quote:'"我刚才在水底笑你。"',
+      stats:[
+        ['SOCIAL_BATTERY',    38, '社交电量'],
+        ['OVERTHINKING',      72, '想得多'],
+        ['CHAOS',             26, '混乱度'],
+        ['MEME_LEVEL',        52, '抽象程度'],
+        ['REALITY_LOADING',   86, '现实加载']
+      ],
+      frames: FRAMES.porpoise,
+      states: framesToStates(FRAMES.porpoise)
+    },
+    { id:'fox', name:'藏狐', status:'无危物种', floatAnim:'floatStiff', floatDuration:'4.5s',
+      mood:'搞笑', quote:'"嗯…我也不知道，但你说得对。"',
+      stats:[
+        ['SOCIAL_BATTERY', 62, '社交电量'],
+        ['OVERTHINKING',   54, '想得多'],
+        ['CHAOS',          40, '混乱度'],
+        ['MEME_LEVEL',     84, '抽象程度'],
+        ['SIDE_EYE',      100, '白眼值']
+      ],
+      frames: FRAMES.fox,
+      states: framesToStates(FRAMES.fox)
+    }
   ];
   const PERSONALITIES = [
     { label:'温柔', lines:['嗯，你来了。','我在这里。一直都在。','等你好久了。'], tapLines:['轻点……','嗯？','……你叫我？'], idleLines:['今天风很轻。','……','嗯。'] },
@@ -1297,7 +1487,7 @@
     const b=buddy;
     document.getElementById('hs-summon').classList.remove('active');
     // 填充命名页
-    document.getElementById('name-animal-art').textContent=(b.animal.states.idle).join('\n');
+    document.getElementById('name-animal-art').textContent = (b.animal.frames && b.animal.frames[0]) || (b.animal.states.idle).join('\n');
     document.getElementById('name-species').textContent=b.animal.name;
     document.getElementById('name-input').value='';
     document.getElementById('name-confirm').classList.remove('ready');
@@ -1325,7 +1515,16 @@
     if(!buddy)return;
     const name=buddy.userName||buddy.name;
     const label=name+' · '+buddy.animal.name;
-    const face=buddy.animal.states.idle[1]||buddy.animal.states.idle[0];
+    // 签名层是单行小脸（不是整只 ASCII），从 frames[0] 取"最像脸"的那一行
+    const fs = buddy.animal.frames;
+    let face = '(=･ω･=)';
+    if(fs && fs[0]){
+      const lines = fs[0].split('\n').map(l=>l.trim()).filter(l=>l.length);
+      // 找第一个含 ω/o/-/◉/. 这些"脸"字符的行
+      face = lines.find(l=>/[ωo\-◉·─ωｖv]/.test(l)) || lines[1] || lines[0];
+    } else {
+      face = buddy.animal.states.idle[1]||buddy.animal.states.idle[0];
+    }
     // 名字
     const askEl=document.getElementById('ask-buddy-name');
     if(askEl)askEl.textContent=name;
@@ -1356,6 +1555,21 @@
     document.getElementById('r-status').textContent=b.animal.status+' · 腾讯公益野朋友计划';
     document.getElementById('r-name').textContent=b.userName||b.name;
     document.getElementById('r-from').textContent=(b.userName||b.name)+' · '+b.animal.name;
+    // 气质 quote
+    document.getElementById('r-quote').textContent = `${b.animal.mood||''} · ${b.animal.quote||''}`;
+    // 5 条特征值 stats（延迟 200ms 让 bar 从 0 滑上去）
+    const statsWrap = document.getElementById('r-stats');
+    if(statsWrap && Array.isArray(b.animal.stats)){
+      statsWrap.innerHTML = b.animal.stats.map(([k,v,zh])=>`
+        <div class="reveal-stat-row">
+          <div class="reveal-stat-label">${k}</div>
+          <div class="reveal-stat-bar"><i data-w="${v}"></i></div>
+          <div class="reveal-stat-val">${v}</div>
+        </div>`).join('');
+      setTimeout(()=>{
+        statsWrap.querySelectorAll('.reveal-stat-bar i').forEach(i=>{ i.style.width = i.dataset.w + '%'; });
+      }, 300);
+    }
     typewriter(b.line);
     document.getElementById('hs-summon').classList.remove('active');
     revealEl.classList.add('active');
@@ -1364,13 +1578,40 @@
 
   function renderState(state){
     if(!buddy)return;
-    const lines=buddy.animal.states[state]||buddy.animal.states.idle;
-    document.getElementById('buddy-stage').textContent=lines.join('\n');
+    // 新逻辑：优先使用 frames[0] 作为静态基准；state 只影响 reveal 时初始帧
+    const fs = buddy.animal.frames;
+    if(fs && fs.length){
+      const idx = state==='happy' ? Math.min(2, fs.length-1) : state==='react' ? fs.length-1 : 0;
+      document.getElementById('buddy-stage').textContent = fs[idx];
+    } else {
+      const lines=buddy.animal.states[state]||buddy.animal.states.idle;
+      document.getElementById('buddy-stage').textContent=lines.join('\n');
+    }
   }
-  function startAnimLoop(){stopAnimations();scheduleBlink();scheduleIdle();}
-  function stopAnimations(){if(blinkTimer)clearTimeout(blinkTimer);if(idleTimer)clearTimeout(idleTimer);}
-  function scheduleBlink(){blinkTimer=setTimeout(()=>{if(!isReacting){renderState('blink');setTimeout(()=>{if(!isReacting)renderState('idle');scheduleBlink();},160);}else scheduleBlink();},2500+Math.random()*3500);}
-  function scheduleIdle(){idleTimer=setTimeout(()=>{if(!isReacting){const s=['happy','shy'][Math.floor(Math.random()*2)];renderState(s);const l=buddy.personality.idleLines;showIdleLine(l[Math.floor(Math.random()*l.length)]);setTimeout(()=>{if(!isReacting)renderState('idle');scheduleIdle();},2000);}else scheduleIdle();},5000+Math.random()*7000);}
+
+  // 帧轮播循环 · 参考 38 号文件 step() 逻辑 · 380ms 切换
+  let frameTick = 0;
+  function startAnimLoop(){
+    stopAnimations();
+    frameTick = 0;
+    blinkTimer = setInterval(()=>{
+      if(!buddy || isReacting) return;
+      const fs = buddy.animal.frames;
+      if(!fs || !fs.length) return;
+      frameTick++;
+      const n = fs.length;
+      // 大部分时间 frame 0 ⇄ 1 呼吸，间歇露出 frame 2+ 的小动作
+      const phase = frameTick % (n*4);
+      let idx = phase % 2;
+      if (n >= 5 && phase === 10) idx = 4;
+      else if (n >= 4 && phase === 7) idx = 3;
+      else if (n >= 3 && phase === 4) idx = 2;
+      document.getElementById('buddy-stage').textContent = fs[idx];
+    }, 380);
+  }
+  function stopAnimations(){if(blinkTimer){clearInterval(blinkTimer);clearTimeout(blinkTimer);}if(idleTimer)clearTimeout(idleTimer);}
+  function scheduleBlink(){} // 弃用
+  function scheduleIdle(){}  // 弃用
 
   function triggerReaction(){
     if(!buddy||isReacting)return;
@@ -1434,10 +1675,32 @@
     document.getElementById('halfscreen').classList.add('open');
     document.getElementById('dim').classList.add('active');
 
-    // 填充状态卡内容
+    // 填充状态卡内容 · 用 frames 做轮播
     const stage = document.getElementById('status-stage');
-    stage.textContent = (b.animal.states[state]||b.animal.states.idle).join('\n');
-    stage.style.animation = `${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
+    const fs = b.animal.frames;
+    if(fs && fs.length){
+      stage.textContent = fs[0];
+      stage.style.animation = `${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
+      // 启动状态页的帧循环
+      if(window._statusFrameTimer) clearInterval(window._statusFrameTimer);
+      let t = 0;
+      window._statusFrameTimer = setInterval(()=>{
+        if(!document.getElementById('hs-status').classList.contains('active')){
+          clearInterval(window._statusFrameTimer); return;
+        }
+        t++;
+        const n = fs.length;
+        const phase = t % (n*4);
+        let idx = phase % 2;
+        if (n >= 5 && phase === 10) idx = 4;
+        else if (n >= 4 && phase === 7) idx = 3;
+        else if (n >= 3 && phase === 4) idx = 2;
+        stage.textContent = fs[idx];
+      }, 380);
+    } else {
+      stage.textContent = (b.animal.states[state]||b.animal.states.idle).join('\n');
+      stage.style.animation = `${b.animal.floatAnim} ${b.animal.floatDuration} ease-in-out infinite`;
+    }
     document.getElementById('st-name').textContent = (b.userName||b.name) + ' · ' + b.animal.name;
     const lineEl = document.getElementById('st-line');
     lineEl.textContent = '';
@@ -1502,7 +1765,8 @@
     const card=document.getElementById('share-card');
     const displayName = b.userName || b.name;
     card.className='share-card sc-'+b.rarity;
-    card.innerHTML=`<div class="sc-inner"><div class="sc-ascii">${b.animal.states.happy.join('\n')}</div><div class="sc-name">${displayName}</div><div class="sc-sp">${b.animal.name} · ${b.animal.status}</div><div class="sc-div"></div><div class="sc-quote">"${b.line}"</div><div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div></div>`;
+    const happyFrame = (b.animal.frames && b.animal.frames[Math.min(2, b.animal.frames.length-1)]) || b.animal.states.happy.join('\n');
+    card.innerHTML=`<div class="sc-inner"><div class="sc-ascii">${happyFrame}</div><div class="sc-name">${displayName}</div><div class="sc-sp">${b.animal.name} · ${b.animal.status}</div><div class="sc-div"></div><div class="sc-quote">"${b.line}"</div><div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div></div>`;
     document.getElementById('share-overlay').classList.add('show');
   }
   function hideShareCard(){document.getElementById('share-overlay').classList.remove('show');}
@@ -1585,7 +1849,7 @@
     const p = BROADCAST_DATA[idx];
     const a = ANIMALS[p.animalIdx];
     // 用完整多行 idle 形状，不再只取脸那一行
-    const face = a.states.idle.join('\n');
+    const face = (a.frames && a.frames[0]) || a.states.idle.join('\n');
     // 动物→文字颜色类
     const faceClassMap = { snow_leopard:'snow', red_panda:'red', crane:'crane', porpoise:'porpoise', fox:'fox' };
     const faceClass = faceClassMap[a.id] || 'snow';
@@ -1630,11 +1894,12 @@
   // ── 分享传播 · 随机刷新 ───────────────────
   function regenerateShare(){
     const b=generate(makeSeed());
-    const idleKaomoji=b.animal.states.idle[1]; // 第二行是脸 · 用于状态
-    const happyFull=b.animal.states.happy.join('\n'); // 完整多行形状 · 用于朋友圈大图
+    const fs = b.animal.frames || [];
+    const idleFrame = fs[0] || b.animal.states.idle.join('\n');
+    const happyFull = fs[Math.min(2, fs.length-1)] || b.animal.states.happy.join('\n');
     document.getElementById('moments-kaomoji').textContent=happyFull;
     document.getElementById('moments-name-line').textContent=`${b.userName||b.name} · ${b.animal.name}`;
-    document.getElementById('status-kaomoji').textContent=idleKaomoji;
+    document.getElementById('status-kaomoji').textContent=idleFrame;
     document.getElementById('status-text').textContent=`${b.name}说：${b.personality.idleLines[0]}`;
   }
   </script>
