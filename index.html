@@ -620,7 +620,7 @@
 (=^ω^=)
  )   (
 (_∪_∪_)</span>
-              <div id="moments-name-line" style="text-align:center;font-size:11px;color:#9ca3af;letter-spacing:1px;padding-bottom:10px;">银荒 · 雪豹 · SR</div>
+              <div id="moments-name-line" style="text-align:center;font-size:11px;color:#9ca3af;letter-spacing:1px;padding-bottom:10px;">银荒 · 雪豹</div>
             </div>
             <!-- 小入口 · 引导好友进 Agent -->
             <div class="mp-card">
@@ -1490,8 +1490,9 @@
   function showShareCard(){
     const b=buddy;
     const card=document.getElementById('share-card');
+    const displayName = b.userName || b.name;
     card.className='share-card sc-'+b.rarity;
-    card.innerHTML=`<div class="sc-inner"><div class="sc-ascii">${b.animal.states.happy.join('\n')}</div><div class="sc-rar">${b.rarity}</div><div class="sc-name">${b.name}</div><div class="sc-sp">${b.animal.name} · ${b.animal.status}</div><div class="sc-div"></div><div class="sc-quote">"${b.line}"</div><div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div></div>`;
+    card.innerHTML=`<div class="sc-inner"><div class="sc-ascii">${b.animal.states.happy.join('\n')}</div><div class="sc-name">${displayName}</div><div class="sc-sp">${b.animal.name} · ${b.animal.status}</div><div class="sc-div"></div><div class="sc-quote">"${b.line}"</div><div class="sc-brand">腾讯公益 × GOODBUDDY · 2026</div></div>`;
     document.getElementById('share-overlay').classList.add('show');
   }
   function hideShareCard(){document.getElementById('share-overlay').classList.remove('show');}
@@ -1622,7 +1623,7 @@
     const idleKaomoji=b.animal.states.idle[1]; // 第二行是脸 · 用于状态
     const happyFull=b.animal.states.happy.join('\n'); // 完整多行形状 · 用于朋友圈大图
     document.getElementById('moments-kaomoji').textContent=happyFull;
-    document.getElementById('moments-name-line').textContent=`${b.name} · ${b.animal.name} · ${b.rarity}`;
+    document.getElementById('moments-name-line').textContent=`${b.userName||b.name} · ${b.animal.name}`;
     document.getElementById('status-kaomoji').textContent=idleKaomoji;
     document.getElementById('status-text').textContent=`${b.name}说：${b.personality.idleLines[0]}`;
   }
