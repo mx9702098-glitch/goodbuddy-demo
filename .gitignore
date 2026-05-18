@@ -1,0 +1,71 @@
+# macOS
+.DS_Store
+
+# Python / venv
+.venv/
+.cache/
+__pycache__/
+*.pyc
+
+# 内部对齐 / 草稿（不发公网）
+*.docx
+.workbuddy/
+
+# 其他历史 demo / 调研 / 内部清单（如需 push 后续单独 git add）
+00-*.md
+01-*.md
+02-*.md
+03-*.md
+04-*.md
+05-*.md
+06-*.md
+07-*.md
+10-*.md
+11-*.html
+12-*.html
+20-*.md
+21-*/
+23-*.md
+24-*.md
+26-*.html
+27-*.html
+31-*.md
+32-*.md
+33-*.md
+34-*.md
+35-*.md
+36-*.md
+37-*.html
+38-*.md
+39-*.html
+40-*.html
+41-*.md
+42-*.md
+43-*.md
+44-*.html
+44-*.md
+45-*.md
+46-*.html
+GOODBUDDY-demo-v5.html
+
+# 工作交付 / 临时 / 多媒体 / 参考素材（私人）
+HANDOFF.md
+assets/
+gongyi-agent-demo/
+output_gifs/
+sprites/
+ref-*.gif
+ref-*.png
+make_sticker_gif.py
+transcribe.log
+uv.lock
+*.m4a
+表情包.html
+好事卡片.html
+【反馈建议】.html
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+*~
