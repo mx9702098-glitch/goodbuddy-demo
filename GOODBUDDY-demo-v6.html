@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>GOODBUDDY · Demo v6.14 · v3 哲学：赠送品不是养成品</title>
+  <title>GOODBUDDY · Demo v6.16 · v3 哲学：赠送品不是养成品</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     body{
@@ -180,14 +180,19 @@
 
     /* ── v6.10 · sig 行回归卡片内部 · 紧贴卡底连成一体 ── */
     /* 适配 success-card / quiz-result / donated-card 三种富卡 · 顶部 1px hairline 分隔 */
-    .card-sig-inline{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background 0.15s;border-top:0.5px solid #f0f0f0;margin:0;}
+    .card-sig-inline{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;transition:background 0.15s;border-top:0.5px solid #f0f0f0;margin:0;}
     .sig-egg-inline{background:#fffaf1;}
     .sig-egg-inline:hover{background:#fff5e3;}
-    .sig-buddy-inline{background:#faf5ff;}
-    .sig-buddy-inline:hover{background:#f5edff;}
-    .card-sig-left{display:flex;align-items:center;gap:7px;flex:1;min-width:0;}
+    .sig-buddy-inline{background:linear-gradient(90deg,#faf5ff 0%,#f5f3ff 100%);}
+    .sig-buddy-inline:hover{background:linear-gradient(90deg,#f5edff 0%,#ede9fe 100%);}
+    .card-sig-left{display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;}
     .card-sig-kaomoji{font-family:"SF Mono",monospace;letter-spacing:1px;font-size:11px;flex-shrink:0;}
+    .card-sig-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px;}
+    .card-sig-title{font-size:12.5px;letter-spacing:0.2px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .card-sig-sub{font-size:10.5px;color:#7c3aed;letter-spacing:0.3px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:0.9;}
     .card-sig-text{font-size:12px;letter-spacing:0.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .card-sig-badge{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 7px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:600;letter-spacing:0.3px;flex-shrink:0;line-height:1;}
+    .card-sig-badge-dot{width:5px;height:5px;border-radius:50%;background:#7c3aed;display:inline-block;}
     .card-sig-arr{font-size:14px;flex-shrink:0;margin-left:8px;}
     /* donated-card 是 padding 型卡（不是 overflow:hidden），sig 行要单独贴底 */
     .donated-card .card-sig-inline{margin:14px -20px -16px;padding:11px 20px;border-radius:0 0 16px 16px;}
@@ -211,6 +216,18 @@
     .gb-act-sub{font-size:12px;color:#9ca3af;margin-top:3px;letter-spacing:0.3px;line-height:1.4;}
     .gb-act-sub b{color:#07C160;font-weight:600;}
     .gb-act-arr{color:#d1d5db;font-size:18px;flex-shrink:0;line-height:1;}
+
+    /* ── v6.16 · Scene 2 推荐项目卡（激活前后对比） ── */
+    .s2-proj-card{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:#f6faf6;border:0.5px solid #e5efe6;cursor:pointer;transition:background 0.15s,border-color 0.15s;}
+    .s2-proj-card:hover{background:#f1f8f2;border-color:#d8eadb;}
+    .s2-proj-thumb{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#bde5c3 0%,#82ca8d 55%,#4fae5f 100%);position:relative;overflow:hidden;flex-shrink:0;}
+    .s2-proj-thumb::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(255,255,255,0.28),transparent 58%);}
+    .s2-proj-main{flex:1;min-width:0;}
+    .s2-proj-title{font-size:13px;font-weight:600;color:#1f2937;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;}
+    .s2-proj-sub{font-size:11px;color:#94a3b8;margin-top:3px;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;}
+    .s2-proj-arr{font-size:16px;color:#cbd5e1;flex-shrink:0;line-height:1;}
+    .s2-proj-cta{margin-top:9px;width:100%;height:34px;border:none;border-radius:9px;background:linear-gradient(135deg,#63be6f,#4ca85a);color:#fff;font-size:12px;font-weight:600;letter-spacing:0.4px;cursor:pointer;font-family:inherit;}
+    .s2-proj-cta:active{transform:scale(0.985);}
 
     /* ── v6.11 · 我们一起做过的 · 时间线日记风 · 跟上面任务卡形成对比 ── */
     .recent-timeline{position:relative;padding:2px 0 2px 0;}
@@ -745,10 +762,10 @@
   </style>
 </head>
 <body>
-  <span class="lab-label">GOODBUDDY · Demo v6.14 · 对齐 47-Skill-MVP-v3</span>
+  <span class="lab-label">GOODBUDDY · Demo v6.16 · 对齐 47-Skill-MVP-v3</span>
   <span style="font-size:10px;color:#475569;letter-spacing:1px;text-align:center;max-width:560px;line-height:1.6;margin-bottom:6px;">
     一句话：做了一件好事，就立刻拥有一只有性格、可分享、可能是 SSR 的小生物。<br>
-    v6.14 更新：未激活🥚卡精简 · 删 meta / 副标题，三件好事入口改原子组件样式（方色 icon + 标题 + 副信息 + ›）
+    v6.16 更新：激活前后对比改用「推荐项目卡」示例（替代小红花余额卡）· 文案与卡片结构对齐公益原子组件
   </span>
 
   <div class="phone">
@@ -833,105 +850,38 @@
     </div>
 
     <!-- ══════════════════════════════════
-         Scene 2 · 激活前后对比（v6.13 重做）
-         一句话：开了 Buddy 后，同一条查询多了什么
-         · OFF 区：干巴巴数据卡 + 普通签名
-         · ON 区：Buddy 气泡 + 同一张 1:1 数据卡 + Buddy sig
-         · ON 还能这样：Buddy 偶尔主动来找你（订阅召回）
-         所有名字 / 数字都从 buddy + MOCK_USER 取，_renderScene2() 兜底
+         Scene 2 · 激活前后对比（v6.16 重做）
+         同一张捐步成功卡 · 上下两版：
+         · 未激活 Buddy → sig 行是蛋（🥚 孵化入口）
+         · 已激活 Buddy → sig 行是 Buddy 签名（点开半屏）
+         无头像、无气泡、无播报开关、无召回，纯卡片对比。
+         由 _renderScene2() 动态注入两张卡。
     ══════════════════════════════════ -->
     <div class="scene" id="scene-2">
-      <div class="chat-area">
+      <div class="chat-area" style="gap:12px;">
 
-        <!-- 顶部 banner · 中性灰底，让下面 ON 区的绿独占 -->
-        <div style="background:#f8f9fa;border-radius:10px;padding:10px 14px;margin-bottom:6px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:8px;">
-          <div style="width:6px;height:6px;background:#9ca3af;border-radius:50%;flex-shrink:0;"></div>
-          <span style="font-size:12px;color:#475569;">开了 Buddy 模式 · <b id="s2-banner-name" style="color:#111;font-weight:600;">白日</b> 会用自己的方式跟你说话</span>
-        </div>
+        <!-- 提示行 -->
+        <div style="text-align:center;font-size:11px;color:#9ca3af;letter-spacing:1px;margin:4px 0 0;">同一张捐步成功卡 · 看看 sig 行的区别</div>
 
-        <!-- 提示行 · 不再用 time-sep（这里不是时间分隔） -->
-        <div style="text-align:center;font-size:11px;color:#9ca3af;letter-spacing:1px;margin:8px 0 4px;">👇 同一条查询 · 看看开 / 关 Buddy 差在哪</div>
-
-        <!-- 用户查询入口 -->
-        <div class="user-row"><div class="user-bubble">帮我查查我的小红花</div></div>
-
-        <!-- ── 关 Buddy（OFF）· 干巴巴数据卡 ── -->
-        <div class="density-label dl-light" style="margin:8px 0 4px;">关 · 跟普通 Agent 一样</div>
-        <div style="background:#f8f9fa;border-radius:10px;padding:8px 10px 8px;margin:0;border:1px solid #eef0f3;">
-          <div class="msg-row" style="margin:0;">
-            <div class="agent-avatar">益</div>
-            <div style="flex:1;">
-              <div class="card" style="margin:0;max-width:260px;">
-                <div class="card-body" style="padding-top:12px;padding-bottom:12px;">
-                  <div class="card-tag" style="color:#6366f1;">📊 小红花余额</div>
-                  <div style="font-size:22px;font-weight:900;color:#111;margin:4px 0;"><span id="s2-off-balance">28</span> 朵</div>
-                  <div style="font-size:11px;color:#9ca3af;">离召唤下一只还差 <b id="s2-off-gap" style="color:#374151;font-weight:500;">2</b> 朵</div>
-                </div>
-                <div class="card-sig">
-                  <div class="sig-left">
-                    <div class="sig-dot"></div>
-                    <span class="sig-kaomoji">(=･ω･=)</span>
-                    <span class="sig-text">公益账户 · 余额查询</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <!-- ── 未激活 Buddy ── -->
+        <div>
+          <div class="density-label dl-light" style="margin:0 0 6px;">未激活 Buddy · sig 行是孵化入口</div>
+          <div class="card-wrap" id="s2-card-inactive">
+            <!-- _renderScene2() 注入 -->
           </div>
         </div>
 
-        <!-- ── 开 Buddy（ON）· 同一条查询 + 同一张卡 + Buddy 气泡 + Buddy sig ── -->
-        <div class="density-label dl-mid" style="margin:14px 0 4px;color:#059669;">开 · 多了一个朋友在帮你说话</div>
-        <div style="background:#f0faf4;border-radius:10px;padding:8px 10px 8px;margin:0;border:1px solid #d1fae5;">
-
-          <!-- ① Buddy 一句话气泡 · 不占卡面积 · 带主动提及最近行为 -->
-          <div class="msg-row" style="margin:0 0 6px;">
-            <div class="agent-avatar">益</div>
-            <div class="agent-bubble" style="background:#fff;">
-              <span id="s2-on-mini-ascii" style="font-family:'SF Mono',monospace;font-size:11px;color:#94a3b8;letter-spacing:1px;display:block;margin-bottom:3px;">/\_/\ ( o.o )</span>
-              <span id="s2-on-line"><b style="color:#7c3aed;">白日</b> 说：&ldquo;你已经攒了 <b style="color:#d97706;">28</b> 朵了，再 <b style="color:#d97706;">2</b> 朵我就能见到弟弟妹妹啦。&rdquo;</span>
-            </div>
-          </div>
-
-          <!-- ② 1:1 数据卡 · 跟 OFF 版完全同结构、同数据，仅 sig 区被 GOODBUDDY 替换 -->
-          <div class="msg-row" style="margin:0;">
-            <div style="width:36px;flex-shrink:0;"></div>
-            <div style="flex:1;">
-              <div class="card" style="margin:0;max-width:260px;">
-                <div class="card-body" style="padding-top:12px;padding-bottom:12px;">
-                  <div class="card-tag" style="color:#6366f1;">📊 小红花余额</div>
-                  <div style="font-size:22px;font-weight:900;color:#111;margin:4px 0;"><span id="s2-on-balance">28</span> 朵</div>
-                  <div style="font-size:11px;color:#9ca3af;">离召唤下一只还差 <b id="s2-on-gap" style="color:#374151;font-weight:500;">2</b> 朵</div>
-                </div>
-                <!-- sig 由 goodbuddy.getBuddySig() 注入 · 主题色跟 personality 走 -->
-                <div class="card-sig" onclick="openStatusScreen()" style="cursor:pointer;background:#faf5ff;">
-                  <div class="sig-left">
-                    <div class="sig-dot" style="background:#d8b4fe;"></div>
-                    <span class="sig-kaomoji" id="s2-on-sig-ascii" style="color:#7c3aed;">/\_/\</span>
-                    <span class="sig-text" id="s2-on-sig-text" style="color:#6b21a8;">白日 · 拍拍我看看 TA</span>
-                  </div>
-                  <span class="sig-arr" style="color:#7c3aed;">›</span>
-                </div>
-              </div>
-            </div>
+        <!-- ── 已激活 Buddy ── -->
+        <div>
+          <div class="density-label dl-mid" style="margin:0 0 6px;color:#7c3aed;">已激活 Buddy · sig 行变成 TA 的签名</div>
+          <div class="card-wrap" id="s2-card-active">
+            <!-- _renderScene2() 注入 -->
           </div>
         </div>
 
-        <!-- ── ON 还能这样 · Buddy 主动召回（订阅触发 · 早上 8 点 TA 来叫你） ── -->
-        <div class="density-label dl-mid" style="margin:14px 0 4px;color:#059669;">开 · 还能这样 · TA 偶尔会主动来找你</div>
-        <div style="background:#f0faf4;border-radius:10px;padding:6px 10px 8px;margin:0;border:1px solid #d1fae5;">
-          <div class="time-sep" style="background:transparent;margin:4px 0 6px;color:#94a3b8;font-size:10px;">明早 8:00 · 订阅召回</div>
-          <div class="msg-row" style="margin:0;" onclick="openStatusScreen()">
-            <div class="agent-avatar">益</div>
-            <div class="agent-bubble" style="background:#fff;cursor:pointer;">
-              <span id="s2-recall-ascii" style="font-family:'SF Mono',monospace;font-size:11px;color:#94a3b8;letter-spacing:1px;display:block;margin-bottom:3px;">/\_/\ ( o.o )</span>
-              <span id="s2-recall-line">早上好 <b style="color:#374151;">阿明</b> · 昨晚那 <b style="color:#d97706;">¥20</b> 已经送到 <b style="color:#7c3aed;">春蕾计划</b> 那边了。今天还想再做点啥吗？</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 工程师注脚 · 一行小灰字 · 不占空间但留给"懂的人"看 -->
-        <div style="font-size:10.5px;color:#94a3b8;letter-spacing:0.5px;line-height:1.7;margin:14px 4px 8px;text-align:center;">
-          <code style="background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:10px;color:#475569;">goodbuddy</code> 是独立 skill · 数据卡保持 1:1 不动 · 只在主 Agent 气泡和 sig 区装饰
+        <!-- 一行小灰字 -->
+        <div style="font-size:10.5px;color:#94a3b8;letter-spacing:0.5px;line-height:1.7;text-align:center;margin-top:4px;">
+          数据卡保持 1:1 不变 · Buddy 只装饰 sig 行
         </div>
 
       </div>
@@ -1510,54 +1460,48 @@
     return buddy;
   }
 
-  // v6.13 · Scene 2 渲染：所有名字 / 数字 / ASCII 都从 buddy + MOCK_USER 取
+  // v6.16 · Scene 2 渲染：直接用捐步成功卡做对比，只切换 sig 行
   function _renderScene2(){
-    const b = _ensureBuddy();
-    const name = b.userName || b.name;
-    const speciesName = b.animal.name;
-    const miniFace = (b.animal.frames && b.animal.frames[0])
-      ? b.animal.frames[0].split('\n').filter(l=>l.trim()).slice(0,1).join(' ')
-      : '/\\_/\\ ( o.o )';
-    const sigFace = miniFace.split(' ')[0] || '/\\_/\\';
-    const bal = MOCK_USER.flower_balance;
-    const need = MOCK_USER.flower_to_summon;
-    const gap = Math.max(0, need - bal);
-    const nick = MOCK_USER.wechat_nickname || '你';
+    _ensureBuddy();
 
-    // banner
-    const $ = id => document.getElementById(id);
-    if($('s2-banner-name')) $('s2-banner-name').textContent = name;
-
-    // OFF 卡
-    if($('s2-off-balance')) $('s2-off-balance').textContent = bal;
-    if($('s2-off-gap'))     $('s2-off-gap').textContent     = gap;
-
-    // ON · Buddy 气泡（提到余额 + 离召唤还差几朵）
-    if($('s2-on-mini-ascii')) $('s2-on-mini-ascii').textContent = miniFace;
-    if($('s2-on-balance')) $('s2-on-balance').textContent = bal;
-    if($('s2-on-gap'))     $('s2-on-gap').textContent     = gap;
-    if($('s2-on-line')){
-      $('s2-on-line').innerHTML =
-        `<b style="color:#7c3aed;">${name}</b> 说：&ldquo;你已经攒了 <b style="color:#d97706;">${bal}</b> 朵了，再 <b style="color:#d97706;">${gap}</b> 朵我就能见到弟弟妹妹啦。&rdquo;`;
+    function _stepCardBody(){
+      return '<div class="success-top">'
+        + '<div class="success-check">'
+        + '<div class="check-icon">\u2713</div>'
+        + '<div class="check-label">\u6350\u6b65\u6210\u529f</div>'
+        + '</div></div>'
+        + '<div class="success-body">'
+        + '<div class="info-group">'
+        + '<div class="count-row">'
+        + '<div class="count-cell"><div class="count-num">8,234<span class="count-unit">\u6b65</span></div><div class="count-label">\u672c\u6b21\u6350\u6b65</div></div>'
+        + '<div class="count-cell"><div class="count-num">\u00a50.41</div><div class="count-label">\u672c\u6b21\u516c\u76ca\u91d1</div></div>'
+        + '</div>'
+        + '<div class="together-row">'
+        + '<div class="together-avatars"><div class="together-av a1">\u674e</div><div class="together-av a2">\u738b</div><div class="together-av me">\u4f60</div></div>'
+        + '<div class="together-txt">\u5df2\u6709 <b>60.6 \u4e07\u4eba</b> \u652f\u6301\u300c\u6751\u6821\u53a8\u623f\u7115\u65b0\u300d</div>'
+        + '</div></div>'
+        + '<button class="flower-btn" disabled style="opacity:0.55;">\ud83c\udf38 \u5e26\u4e0a\u5c0f\u7ea2\u82b1\u5427</button>'
+        + '<div class="success-actions">'
+        + '<button class="action-link" onclick="showToast(\'\u9879\u76ee\u8fdb\u5c55\u5361\u7a0d\u540e\u7ed9\u4f60\')">\u4e86\u89e3\u9879\u76ee\u8fdb\u5c55</button>'
+        + '<span class="action-dot">\u00b7</span>'
+        + '<button class="action-link" onclick="showToast(\'\u597d\uff0c\u660e\u5929 8 \u70b9\u63d0\u9192\u4f60\')">\u63d0\u9192\u6211\u660e\u5929\u6350\u6b65</button>'
+        + '</div></div>';
     }
 
-    // ON · sig 区
-    if($('s2-on-sig-ascii')) $('s2-on-sig-ascii').textContent = sigFace;
-    if($('s2-on-sig-text'))  $('s2-on-sig-text').textContent  = `${name} · 拍拍我看看 TA`;
+    var eggSig = '<div class="card-sig-inline sig-egg-inline" onclick="openHalfscreen(\'\u56e0\u4e3a\u4f60\u7684\u5584\u884c\')">'
+      + '<div class="card-sig-left">'
+      + '<span class="card-sig-text" style="color:#92400e;">\u4f60\u7684\u5584\u884c\u53ef\u4ee5\u5b55\u80b2\u4e00\u4e2a\u5c0f\u4f19\u4f34 \ud83e\udd5a \u2192 \u4e86\u89e3\u4e00\u4e0b\uff1f</span>'
+      + '</div>'
+      + '<span class="card-sig-arr" style="color:#d97706;">\u203a</span>'
+      + '</div>';
 
-    // ON · Buddy 主动召回（拿最近一条 deed 拼一段问候）
-    if($('s2-recall-ascii')) $('s2-recall-ascii').textContent = miniFace;
-    if($('s2-recall-line')){
-      const last = (MOCK_USER.recent_deeds || [])[0];
-      let lastDesc = '昨晚那件好事';
-      if(last){
-        if(last.type === 'donate')      lastDesc = `昨晚那 <b style="color:#d97706;">¥${last.payload.amount||1}</b> 已经送到 <b style="color:#7c3aed;">${last.payload.target||'守护项目'}</b> 那边了`;
-        else if(last.type === 'step')   lastDesc = `昨天那 <b style="color:#d97706;">${(last.payload.steps||0).toLocaleString()}</b> 步已经换成 <b style="color:#7c3aed;">${last.payload.target||'守护湿地'}</b> 的捐赠了`;
-        else if(last.type === 'answer') lastDesc = `昨天那道 <b style="color:#7c3aed;">${last.payload.topic||'公益常识'}</b> 题，你答对啦`;
-      }
-      $('s2-recall-line').innerHTML =
-        `早上好 <b style="color:#374151;">${nick}</b> · ${lastDesc}。今天还想再做点啥吗？`;
-    }
+    var buddySig = buildSkillSigInner('step');
+
+    var inactiveBox = document.getElementById('s2-card-inactive');
+    if(inactiveBox) inactiveBox.innerHTML = '<div class="success-card">' + _stepCardBody() + eggSig + '</div>';
+
+    var activeBox = document.getElementById('s2-card-active');
+    if(activeBox) activeBox.innerHTML = '<div class="success-card">' + _stepCardBody() + buddySig + '</div>';
   }
 
   // ── 半屏 ──────────────────────────────────
@@ -1789,14 +1733,46 @@
     }, 380);
   }
 
-  // v6.10 · sig 行回归卡片内部（紧贴卡底，连成一体）· 仍按 has_buddy 切换蛋彩蛋/Buddy sig
-  function buildSkillSigInner(){
+  // v6.15 · 激活后签名行：统一样式 + 按卡片类型改写文案
+  function buildBuddySigCopy(cardType){
+    const buddyName = (buddy && (buddy.userName||buddy.name)) || '白日';
+    const gap = Math.max(0, MOCK_USER.flower_to_summon - MOCK_USER.flower_balance);
+    const gapText = gap > 0 ? `再攒 ${gap} 朵就能召唤下一只` : '现在就能召唤下一只了';
+    if(cardType === 'step'){
+      return {
+        title: `${buddyName}：今天这步数我替你记下了`,
+        sub: `${gapText} · 点我看状态`
+      };
+    }
+    if(cardType === 'answer'){
+      return {
+        title: `${buddyName}：这题答得很稳，我记你一朵花`,
+        sub: `${gapText} · 明天我再来问你`
+      };
+    }
+    if(cardType === 'donate'){
+      return {
+        title: `${buddyName}：这笔善意送到了，我替你盯后续`,
+        sub: `${gapText} · 点我看捐赠记录`
+      };
+    }
+    return {
+      title: `${buddyName}：我在，继续一起做好事吧`,
+      sub: `${gapText} · 点我看状态`
+    };
+  }
+
+  function buildSkillSigInner(cardType){
     const buddyName = (buddy && (buddy.userName||buddy.name)) || '白日';
     if(MOCK_USER.has_buddy){
+      const copy = buildBuddySigCopy(cardType);
       return `<div class="card-sig-inline sig-buddy-inline" onclick="openStatusScreen()">
         <div class="card-sig-left">
-          <span class="card-sig-kaomoji" style="color:#7c3aed;">/\\_/\\</span>
-          <span class="card-sig-text" style="color:#6b21a8;">${buddyName} · 帮你记着 · +1 朵 🌸</span>
+          <span class="card-sig-badge"><span class="card-sig-badge-dot"></span>Buddy 在场</span>
+          <div class="card-sig-main">
+            <span class="card-sig-title" style="color:#6b21a8;">${copy.title}</span>
+            <span class="card-sig-sub">${copy.sub}</span>
+          </div>
         </div>
         <span class="card-sig-arr" style="color:#7c3aed;">›</span>
       </div>`;
@@ -1846,7 +1822,7 @@
           <button class="action-link" onclick="showToast('好，明天 8 点提醒你')">提醒我明天捐步</button>
         </div>
       </div>
-      ${buildSkillSigInner()}
+      ${buildSkillSigInner('step')}
     </div>`;
   }
 
@@ -1880,7 +1856,7 @@
           <button class="action-link" onclick="showToast('好，明天 9 点提醒你')">提醒明日答题</button>
         </div>
       </div>
-      ${buildSkillSigInner()}
+      ${buildSkillSigInner('answer')}
     </div>`;
   }
 
@@ -1894,7 +1870,7 @@
       <a class="donated-sublink" onclick="showToast('已订阅 · 服务号推送')">订阅本项目进展 ›</a>
       <button class="flower-btn donated-flower" onclick="onFlowerBtnClick(this,'donate')">🌸 戴上小红花</button>
       <button class="donated-cert-btn" onclick="showToast('捐赠证书已生成 📜')">我的捐赠证书</button>
-      ${buildSkillSigInner()}
+      ${buildSkillSigInner('donate')}
     </div>`;
   }
 
