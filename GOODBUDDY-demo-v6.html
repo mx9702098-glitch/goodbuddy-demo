@@ -186,9 +186,8 @@
     .sig-buddy-inline{background:linear-gradient(90deg,#faf5ff 0%,#f5f3ff 100%);}
     .sig-buddy-inline:hover{background:linear-gradient(90deg,#f5edff 0%,#ede9fe 100%);}
     .card-sig-left{display:flex;align-items:center;gap:9px;flex:1;min-width:0;}
-    .card-sig-face{display:flex;flex-direction:column;align-items:center;flex-shrink:0;gap:2px;}
+    .card-sig-face{flex-shrink:0;}
     .card-sig-face-ascii{font-family:"SF Mono","Fira Code",monospace;font-size:8px;line-height:1.05;color:#7c3aed;white-space:pre;text-align:center;letter-spacing:0.5px;}
-    .card-sig-face-name{font-size:9px;color:#6b21a8;font-weight:600;letter-spacing:0.8px;text-align:center;}
     .card-sig-text{font-size:12px;letter-spacing:0.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
     .card-sig-arr{font-size:14px;flex-shrink:0;margin-left:8px;}
     /* donated-card 是 padding 型卡（不是 overflow:hidden），sig 行要单独贴底 */
@@ -1748,11 +1747,8 @@
       const line = _buddySigLine(cardType);
       return '<div class="card-sig-inline sig-buddy-inline" onclick="openStatusScreen()">'
         + '<div class="card-sig-left">'
-        + '<div class="card-sig-face">'
-        + '<div class="card-sig-face-ascii">' + face + '</div>'
-        + '<div class="card-sig-face-name">' + buddyName + '</div>'
-        + '</div>'
-        + '<span class="card-sig-text" style="color:#6b21a8;">' + line + '</span>'
+        + '<div class="card-sig-face"><div class="card-sig-face-ascii">' + face + '</div></div>'
+        + '<span class="card-sig-text" style="color:#6b21a8;"><b style="color:#7c3aed;">' + buddyName + '</b>：' + line + '</span>'
         + '</div>'
         + '<span class="card-sig-arr" style="color:#7c3aed;">›</span>'
         + '</div>';
